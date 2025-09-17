@@ -40,22 +40,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Map Tabs - Interactive Map and TEMPO NO2 Map */}
-                <Tabs defaultValue="interactive" className="w-full">
-                    <TabsList className="mb-4">
-                        <TabsTrigger value="interactive">
-                            Air Quality Map
-                        </TabsTrigger>
-                        <TabsTrigger value="tempo">
-                            TEMPO NO₂ Concentration
-                        </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="interactive">
-                        <InteractiveMap location={currentLocation} />
-                    </TabsContent>
-                    <TabsContent value="tempo">
-                        <TempoMap date={currentDate} />
-                    </TabsContent>
-                </Tabs>
+                <Tabs defaultValue="interactive" className="w-full"></Tabs>
 
                 {/* Forecast Panel - Full width */}
                 <div className="w-full">
