@@ -112,7 +112,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: CheckCircle,
                 color: "text-green-600",
-                bgColor: "backdrop-blur-md bg-white/10 dark:bg-black/10",
+                bgColor: "backdrop-blur-md bg-green-500/20 dark:bg-green-500/15",
                 borderColor: "border-green-500/30",
                 title: "Good Air Quality",
                 description:
@@ -127,7 +127,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: Shield,
                 color: "text-yellow-600",
-                bgColor: "backdrop-blur-md bg-white/10 dark:bg-black/10",
+                bgColor: "backdrop-blur-md bg-yellow-500/20 dark:bg-yellow-500/15",
                 borderColor: "border-yellow-500/30",
                 title: "Moderate Air Quality",
                 description:
@@ -142,7 +142,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: AlertTriangle,
                 color: "text-red-600",
-                bgColor: "backdrop-blur-md bg-white/10 dark:bg-black/10",
+                bgColor: "backdrop-blur-md bg-red-500/20 dark:bg-red-500/15",
                 borderColor: "border-red-500/30",
                 title: "Unhealthy Air Quality",
                 description:
@@ -189,9 +189,9 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
     };
 
     const getNotificationColor = (type: Notification['type'], priority: Notification['priority']) => {
-        if (priority === 'high') return "backdrop-blur-md bg-white/10 dark:bg-black/10 border-red-500/50";
-        if (type === 'warning') return "backdrop-blur-md bg-white/10 dark:bg-black/10 border-yellow-500/50";
-        return "backdrop-blur-md bg-white/10 dark:bg-black/10 border-blue-500/50";
+        if (priority === 'high') return "backdrop-blur-md bg-red-500/20 dark:bg-red-500/15 border-red-500/50";
+        if (type === 'warning') return "backdrop-blur-md bg-yellow-500/20 dark:bg-yellow-500/15 border-yellow-500/50";
+        return "backdrop-blur-md bg-blue-500/20 dark:bg-blue-500/15 border-blue-500/50";
     };
 
     const getNotificationTextColor = (type: Notification['type'], priority: Notification['priority']) => {
