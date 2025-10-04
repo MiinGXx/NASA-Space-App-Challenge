@@ -24,6 +24,7 @@ interface Notification {
 export function HealthGuidance({ location }: HealthGuidanceProps) {
     const [currentAQI, setCurrentAQI] = useState(42); // Default AQI value
     const [activeTab, setActiveTab] = useState("health");
+    const [animatedNotifications, setAnimatedNotifications] = useState<Set<string>>(new Set());
     const [notifications, setNotifications] = useState<Notification[]>([
         {
             id: '1',
@@ -75,6 +76,36 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             setNotifications(prev => [locationNotification, ...prev]);
         }
     }, [location]);
+
+    // Animate notifications when notifications tab is activated
+    useEffect(() => {
+        if (activeTab === 'notifications') {
+            // Clear existing animations first
+            setAnimatedNotifications(new Set());
+            
+            // Animate each notification with a stagger effect
+            notifications.forEach((notification, index) => {
+                setTimeout(() => {
+                    setAnimatedNotifications(prev => new Set([...prev, notification.id]));
+                }, index * 100); // 100ms stagger between each notification
+            });
+        }
+    }, [activeTab]);
+
+    // Animate new notifications when they're added (only if notifications tab is active)
+    useEffect(() => {
+        if (activeTab === 'notifications' && notifications.length > 0) {
+            // Find notifications that aren't animated yet
+            const newNotifications = notifications.filter(n => !animatedNotifications.has(n.id));
+            
+            // Animate only the new notifications
+            newNotifications.forEach((notification, index) => {
+                setTimeout(() => {
+                    setAnimatedNotifications(prev => new Set([...prev, notification.id]));
+                }, index * 100); // 100ms stagger for new notifications
+            });
+        }
+    }, [notifications]);
 
     const getHealthGuidance = (aqi: number) => {
         if (aqi <= 50) {
@@ -158,15 +189,9 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
     };
 
     const getNotificationColor = (type: Notification['type'], priority: Notification['priority']) => {
-        if (priority === 'high') return "bg-red-500/20 backdrop-blur-sm border-red-500/30";
-        if (type === 'warning') return "bg-yellow-500/20 backdrop-blur-sm border-yellow-500/30";
-        return "bg-blue-500/20 backdrop-blur-sm border-blue-500/30";
-    };
-
-    const getNotificationTextColor = (type: Notification['type'], priority: Notification['priority']) => {
-        if (priority === 'high') return "text-red-600";
-        if (type === 'warning') return "text-yellow-600";
-        return "text-blue-600";
+        if (priority === 'high') return "text-red-600 bg-red-500/20 backdrop-blur-sm border-red-500/30";
+        if (type === 'warning') return "text-yellow-600 bg-yellow-500/20 backdrop-blur-sm border-yellow-500/30";
+        return "text-blue-600 bg-blue-500/20 backdrop-blur-sm border-blue-500/30";
     };
 
     const formatTimeAgo = (date: Date) => {
@@ -267,20 +292,25 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                             <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
                                 {notifications.map((notification) => {
                                     const NotificationIcon = getNotificationIcon(notification.type);
+                                    const isAnimated = animatedNotifications.has(notification.id);
                                     return (
                                         <Alert
                                             key={notification.id}
                                             className={`${getNotificationColor(notification.type, notification.priority)} ${
                                                 !notification.read ? 'border-l-4 border-l-primary' : 'opacity-75'
-                                            } cursor-pointer hover:shadow-md relative w-full`}
+                                            } cursor-pointer transition-all duration-500 ease-out hover:shadow-md relative w-full transform ${
+                                                isAnimated 
+                                                    ? 'translate-x-0 opacity-100' 
+                                                    : 'translate-x-full opacity-0'
+                                            }`}
                                             onClick={() => markAsRead(notification.id)}
                                         >
-                                            <NotificationIcon className={`h-4 w-4 ${getNotificationTextColor(notification.type, notification.priority)}`} />
+                                            <NotificationIcon className="h-4 w-4" />
                                             <AlertDescription className="w-full">
                                                 <div className="flex items-start justify-between w-full">
                                                     <div className="space-y-2 flex-1">
                                                         <div className="flex items-center gap-2">
-                                                            <h4 className={`font-semibold ${getNotificationTextColor(notification.type, notification.priority)}`}>
+                                                            <h4 className="font-semibold">
                                                                 {notification.title}
                                                             </h4>
                                                             {!notification.read && (
@@ -311,7 +341,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                                                             e.stopPropagation();
                                                             dismissNotification(notification.id);
                                                         }}
-                                                        className="ml-2 p-1 hover:bg-background/50 rounded flex-shrink-0"
+                                                        className="ml-2 p-1 hover:bg-background/50 rounded transition-colors flex-shrink-0"
                                                     >
                                                         <X className="h-3 w-3" />
                                                     </button>
