@@ -226,7 +226,7 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-card border rounded-lg p-3 shadow-lg">
+                <div className="backdrop-blur-md bg-white/10 dark:bg-white/10 border border-white/20 dark:border-white/10 rounded-lg p-3 shadow-lg">
                     <p className="font-medium text-foreground">{label}</p>
                     {payload.map((entry: any, index: number) => (
                         <p
