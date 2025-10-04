@@ -300,7 +300,7 @@ export function AQIStatus({ location }: AQIStatusProps) {
 
                 {/* Pollutant Breakdown */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-3 rounded-lg border border-border">
+                    <div className="text-center p-3 rounded-lg border border-white/50">
                         <div className="text-lg font-semibold text-foreground">
                             {aqiData.pollutants.pm25}
                         </div>
@@ -308,7 +308,7 @@ export function AQIStatus({ location }: AQIStatusProps) {
                             PM2.5 μg/m³
                         </div>
                     </div>
-                    <div className="text-center p-3 rounded-lg border border-border">
+                    <div className="text-center p-3 rounded-lg border border-white/50">
                         <div className="text-lg font-semibold text-foreground">
                             {aqiData.pollutants.pm10}
                         </div>
@@ -316,7 +316,7 @@ export function AQIStatus({ location }: AQIStatusProps) {
                             PM10 μg/m³
                         </div>
                     </div>
-                    <div className="text-center p-3 rounded-lg border border-border">
+                    <div className="text-center p-3 rounded-lg border border-white/50">
                         <div className="text-lg font-semibold text-foreground">
                             {aqiData.pollutants.o3}
                         </div>
@@ -324,7 +324,7 @@ export function AQIStatus({ location }: AQIStatusProps) {
                             O₃ μg/m³
                         </div>
                     </div>
-                    <div className="text-center p-3 rounded-lg border border-border">
+                    <div className="text-center p-3 rounded-lg border border-white/50">
                         <div className="text-lg font-semibold text-foreground">
                             {aqiData.pollutants.no2}
                         </div>

@@ -35,7 +35,7 @@ export function LocationSearch({ onSearch }: SearchBarProps) {
                     </div>
                     <Button
                         type="submit"
-                        className="h-10 border border-white/50"
+                        className="h-10 border border-white/50 dark:border-white/20 bg-white/30 hover:bg-white/40 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white"
                     >
                         Search
                     </Button>
