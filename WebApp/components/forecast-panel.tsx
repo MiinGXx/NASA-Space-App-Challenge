@@ -368,7 +368,11 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
                         {/* Weekly Chart */}
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={weeklyForecast}>
+                                <LineChart
+                                    data={weeklyForecast.filter(
+                                        (day) => day.aqi !== 0
+                                    )}
+                                >
                                     <CartesianGrid
                                         strokeDasharray="3 3"
                                         className="opacity-30"
