@@ -247,7 +247,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
     };
 
     return (
-        <Card className="w-full h-[520px]">
+        <Card className="w-full min-h-[520px]">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Heart className="h-5 w-5 text-red-500" />
