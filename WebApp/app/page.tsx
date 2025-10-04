@@ -7,9 +7,15 @@ import { ForecastPanel } from "@/components/forecast-panel";
 import { HealthGuidance } from "@/components/health-guidance";
 import { Header } from "@/components/header";
 import { LocationSearch } from "@/components/location-search";
-import TempoMap from "@/components/tempo-map";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import dynamic from "next/dynamic";
+
+// Dynamically import TempoMap to avoid SSR issues with Leaflet
+const TempoMap = dynamic(() => import("@/components/tempo-map"), {
+    ssr: false,
+    loading: () => <div className="h-96 flex items-center justify-center">Loading map...</div>,
+});
 
 export default function HomePage() {
     const [currentLocation, setCurrentLocation] = useState<string>("");
@@ -39,8 +45,21 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Map Tabs - Interactive Map and TEMPO NO2 Map */}
-                <Tabs defaultValue="interactive" className="w-full"></Tabs>
+                {/* Map Visualization Panel */}
+                <div className="w-full">
+                    <Tabs defaultValue="interactive" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="interactive">Interactive Map</TabsTrigger>
+                            <TabsTrigger value="tempo">TEMPO NO₂ Map</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="interactive" className="mt-6">
+                            <InteractiveMap location={currentLocation} />
+                        </TabsContent>
+                        <TabsContent value="tempo" className="mt-6">
+                            <TempoMap date={currentDate} />
+                        </TabsContent>
+                    </Tabs>
+                </div>
 
                 {/* Forecast Panel - Full width */}
                 <div className="w-full">
