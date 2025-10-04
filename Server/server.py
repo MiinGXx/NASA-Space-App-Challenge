@@ -174,3 +174,53 @@ if tz_for_pandas:
 	except Exception:
 		pass
 print("\nDaily data\n", daily_dataframe)
+
+# --- Fetch air quality data (pm10, pm2_5) from Open-Meteo Air Quality API ---
+try:
+	aq_url = "https://air-quality-api.open-meteo.com/v1/air-quality"
+	# Request additional pollutants and US AQI when available, plus UV/current data and a short forecast
+	aq_params = {
+		"latitude": lat,
+		"longitude": lon,
+		"hourly": ",".join(["pm10", "pm2_5", "us_aqi", "nitrogen_dioxide", "carbon_monoxide", "ozone"]),
+		"current": ",".join(["us_aqi", "uv_index", "uv_index_clear_sky"]),
+		"forecast_days": 1,
+		"timezone": "auto",
+	}
+	aq_resp = requests.get(aq_url, params=aq_params, timeout=15)
+	aq_resp.raise_for_status()
+	aq_json = aq_resp.json()
+
+	# Build a pandas DataFrame for hourly AQ
+	aq_hourly = aq_json.get("hourly", {})
+	aq_times = aq_hourly.get("time", [])
+	aq_pm10 = aq_hourly.get("pm10", [])
+	aq_pm25 = aq_hourly.get("pm2_5", [])
+	aq_ozone = aq_hourly.get("ozone", [])
+	aq_no2 = aq_hourly.get("nitrogen_dioxide", [])
+	aq_co = aq_hourly.get("carbon_monoxide", [])
+	aq_us_aqi = aq_hourly.get("us_aqi", [])
+
+	if aq_times and (aq_pm10 or aq_pm25 or aq_ozone or aq_no2 or aq_co or aq_us_aqi):
+		aq_df = pd.DataFrame({
+			"date": pd.to_datetime(aq_times, utc=True),
+			"pm10": aq_pm10,
+			"pm2_5": aq_pm25,
+			"ozone": aq_ozone,
+			"nitrogen_dioxide": aq_no2,
+			"carbon_monoxide": aq_co,
+			"us_aqi": aq_us_aqi,
+		})
+
+		# If we have a tz name, convert the datetimes to local tz
+		if tz_for_pandas:
+			try:
+				aq_df["date"] = aq_df["date"].dt.tz_convert(tz_for_pandas)
+			except Exception:
+				pass
+
+		print("\nAir quality (hourly)\n", aq_df.head(24))
+	else:
+		print("\nAir quality: no hourly data returned by API\n")
+except Exception as e:
+	print(f"Failed to fetch air quality data: {e}")
