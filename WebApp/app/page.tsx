@@ -64,7 +64,7 @@ export default function HomePage() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background/90 backdrop-blur-sm">
             <Header />
             <LocationSearch onSearch={handleSearch} />
             <main className="container mx-auto px-4 py-3 space-y-8">
