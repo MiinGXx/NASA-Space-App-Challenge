@@ -158,9 +158,15 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
     };
 
     const getNotificationColor = (type: Notification['type'], priority: Notification['priority']) => {
-        if (priority === 'high') return "text-red-600 bg-red-500/20 backdrop-blur-sm border-red-500/30";
-        if (type === 'warning') return "text-yellow-600 bg-yellow-500/20 backdrop-blur-sm border-yellow-500/30";
-        return "text-blue-600 bg-blue-500/20 backdrop-blur-sm border-blue-500/30";
+        if (priority === 'high') return "bg-red-500/20 backdrop-blur-sm border-red-500/30";
+        if (type === 'warning') return "bg-yellow-500/20 backdrop-blur-sm border-yellow-500/30";
+        return "bg-blue-500/20 backdrop-blur-sm border-blue-500/30";
+    };
+
+    const getNotificationTextColor = (type: Notification['type'], priority: Notification['priority']) => {
+        if (priority === 'high') return "text-red-600";
+        if (type === 'warning') return "text-yellow-600";
+        return "text-blue-600";
     };
 
     const formatTimeAgo = (date: Date) => {
@@ -266,15 +272,15 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                                             key={notification.id}
                                             className={`${getNotificationColor(notification.type, notification.priority)} ${
                                                 !notification.read ? 'border-l-4 border-l-primary' : 'opacity-75'
-                                            } cursor-pointer transition-all hover:shadow-md relative w-full`}
+                                            } cursor-pointer hover:shadow-md relative w-full`}
                                             onClick={() => markAsRead(notification.id)}
                                         >
-                                            <NotificationIcon className="h-4 w-4" />
+                                            <NotificationIcon className={`h-4 w-4 ${getNotificationTextColor(notification.type, notification.priority)}`} />
                                             <AlertDescription className="w-full">
                                                 <div className="flex items-start justify-between w-full">
                                                     <div className="space-y-2 flex-1">
                                                         <div className="flex items-center gap-2">
-                                                            <h4 className="font-semibold text-sm">
+                                                            <h4 className={`font-semibold text-sm ${getNotificationTextColor(notification.type, notification.priority)}`}>
                                                                 {notification.title}
                                                             </h4>
                                                             {!notification.read && (
@@ -305,7 +311,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                                                             e.stopPropagation();
                                                             dismissNotification(notification.id);
                                                         }}
-                                                        className="ml-2 p-1 hover:bg-background/50 rounded transition-colors flex-shrink-0"
+                                                        className="ml-2 p-1 hover:bg-background/50 rounded flex-shrink-0"
                                                     >
                                                         <X className="h-3 w-3" />
                                                     </button>
