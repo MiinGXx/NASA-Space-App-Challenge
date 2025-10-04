@@ -33,7 +33,10 @@ export function LocationSearch({ onSearch }: SearchBarProps) {
                         />
                         <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                     </div>
-                    <Button type="submit" className="h-10">
+                    <Button
+                        type="submit"
+                        className="h-10 border border-white/50"
+                    >
                         Search
                     </Button>
                 </form>

@@ -259,14 +259,14 @@ export function AQIStatus({ location }: AQIStatusProps) {
     }, []);
 
     return (
-        <Card className="w-full">
+        <Card className="w-full h-[520px]">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl">
                     <MapPin className="h-5 w-5" />
                     Current Air Quality
                 </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="flex flex-col justify-center h-full space-y-8">
                 {/* Main AQI Display */}
                 <div className="text-center space-y-4">
                     <div className="relative">
