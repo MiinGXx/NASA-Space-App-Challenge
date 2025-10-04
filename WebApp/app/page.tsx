@@ -16,7 +16,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { Bell, AlertTriangle, CheckCircle, Info, Sparkles } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogTrigger,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { AQIHigherLowerGame } from "@/components/aqi-higher-lower-game";
 
 export default function HomePage() {
     const [currentLocation, setCurrentLocation] = useState<string>("");
@@ -25,6 +35,7 @@ export default function HomePage() {
     );
     const { notification, showNotification, hideNotification } =
         useNotifications();
+    const [openGame, setOpenGame] = useState(false);
 
     const handleSearch = (location: string) => {
         console.log("Searching for location:", location);
@@ -69,6 +80,38 @@ export default function HomePage() {
             <Header />
             <LocationSearch onSearch={handleSearch} />
             <main className="container mx-auto px-4 py-3 space-y-8">
+                {/* Game Launch Button (Centered Modal / Fullscreen Mobile) */}
+                <div className="flex justify-end">
+                    <Dialog open={openGame} onOpenChange={setOpenGame}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" size="sm" className="gap-2">
+                                <Sparkles className="h-4 w-4" /> Play AQI Higher / Lower
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-none sm:max-w-md w-screen h-dvh sm:h-auto p-0 sm:p-6 left-0 top-0 sm:left-1/2 sm:top-1/2 -translate-x-0 -translate-y-0 sm:-translate-x-1/2 sm:-translate-y-1/2 rounded-none sm:rounded-xl border-0 sm:border">
+                            <div className="flex flex-col h-full">
+                                <DialogHeader className="px-6 pt-6 pb-4 sm:p-0 sm:pb-4 border-b sm:border-none">
+                                    <DialogTitle>AQI Higher / Lower</DialogTitle>
+                                    <DialogDescription>
+                                        Guess if the next city's AQI is higher or lower.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="flex-1 overflow-y-auto px-4 py-4 sm:p-0">
+                                    <AQIHigherLowerGame />
+                                </div>
+                                <DialogFooter className="p-4 pt-0 sm:p-0 border-t sm:border-none">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setOpenGame(false)}
+                                    >
+                                        Close
+                                    </Button>
+                                </DialogFooter>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Current AQI Status - Takes full width on mobile, 2 columns on desktop */}
                     <div className="lg:col-span-2">
