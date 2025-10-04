@@ -72,13 +72,13 @@ export function PushNotification({ notification, onClose }: PushNotificationProp
     const getBackgroundColor = () => {
         switch (notification?.type) {
             case "success":
-                return "bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800";
+                return "bg-green-500/10 border-green-500/20 backdrop-blur-sm";
             case "warning":
-                return "bg-yellow-50 border-yellow-200 dark:bg-yellow-950 dark:border-yellow-800";
+                return "bg-yellow-500/10 border-yellow-500/20 backdrop-blur-sm";
             case "error":
-                return "bg-red-50 border-red-200 dark:bg-red-950 dark:border-red-800";
+                return "bg-red-500/10 border-red-500/20 backdrop-blur-sm";
             default:
-                return "bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800";
+                return "bg-blue-500/10 border-blue-500/20 backdrop-blur-sm";
         }
     };
 
@@ -100,16 +100,16 @@ export function PushNotification({ notification, onClose }: PushNotificationProp
                 <div className="flex items-start gap-3">
                     {getIcon()}
                     <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-foreground mb-1">
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
                             {notification.title}
                         </h4>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
                             {notification.message}
                         </p>
                     </div>
                     <button
                         onClick={handleClose}
-                        className="ml-2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                         aria-label="Close notification"
                     >
                         <X className="h-4 w-4" />

@@ -81,8 +81,8 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: CheckCircle,
                 color: "text-green-600",
-                bgColor: "bg-green-50 dark:bg-green-950",
-                borderColor: "border-green-200 dark:border-green-800",
+                bgColor: "bg-green-500/10 backdrop-blur-sm",
+                borderColor: "border-green-500/20",
                 title: "Good Air Quality",
                 description:
                     "Air quality is satisfactory and poses little or no health risk.",
@@ -96,8 +96,8 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: Shield,
                 color: "text-yellow-600",
-                bgColor: "bg-yellow-50 dark:bg-yellow-950",
-                borderColor: "border-yellow-200 dark:border-yellow-800",
+                bgColor: "bg-yellow-500/10 backdrop-blur-sm",
+                borderColor: "border-yellow-500/20",
                 title: "Moderate Air Quality",
                 description:
                     "Air quality is acceptable for most people, but sensitive individuals may experience minor issues.",
@@ -111,8 +111,8 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: AlertTriangle,
                 color: "text-red-600",
-                bgColor: "bg-red-50 dark:bg-red-950",
-                borderColor: "border-red-200 dark:border-red-800",
+                bgColor: "bg-red-500/10 backdrop-blur-sm",
+                borderColor: "border-red-500/20",
                 title: "Unhealthy Air Quality",
                 description:
                     "Air quality may cause health concerns for sensitive groups.",

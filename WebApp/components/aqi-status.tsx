@@ -109,7 +109,7 @@ export function AQIStatus({ location }: AQIStatusProps) {
                         </div>
                         <Badge
                             variant="secondary"
-                            className="absolute -bottom-2 left-1/2 transform -translate-x-1/2"
+                            className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700"
                         >
                             {getAQILevel(aqiData.value)}
                         </Badge>
