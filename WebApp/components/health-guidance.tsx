@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 
 interface HealthGuidanceProps {
     location?: string;
+    aqi?: number;
 }
 
 interface Notification {
@@ -30,8 +31,9 @@ interface Notification {
     priority: "high" | "medium" | "low";
 }
 
-export function HealthGuidance({ location }: HealthGuidanceProps) {
-    const [currentAQI, setCurrentAQI] = useState(42); // Default AQI value
+export function HealthGuidance({ location, aqi }: HealthGuidanceProps) {
+    // Use AQI from prop if provided, otherwise fallback to 42
+    const [currentAQI, setCurrentAQI] = useState<number>(aqi ?? 42);
     const [activeTab, setActiveTab] = useState("health");
     const [animatedNotifications, setAnimatedNotifications] = useState<
         Set<string>
@@ -68,14 +70,9 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
         },
     ]);
 
-    // Update AQI when location changes
+    // Update AQI when prop changes
     useEffect(() => {
-        if (location) {
-            // In a real app, this would fetch health data for the location
-            // For now, just generate a random AQI value
-            const randomAQI = Math.floor(Math.random() * 200) + 10;
-            setCurrentAQI(randomAQI);
-
+        if (typeof window !== "undefined" && location) {
             // Simulate new notifications for location changes
             const locationNotification: Notification = {
                 id: Date.now().toString(),
@@ -89,6 +86,13 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             setNotifications((prev) => [locationNotification, ...prev]);
         }
     }, [location]);
+
+    // Sync AQI from prop
+    useEffect(() => {
+        if (typeof aqi === "number") {
+            setCurrentAQI(aqi);
+        }
+    }, [aqi]);
 
     // Animate notifications when notifications tab is activated
     useEffect(() => {

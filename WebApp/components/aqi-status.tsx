@@ -3,7 +3,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import {
+    PushNotification,
+    useNotifications,
+} from "@/components/push-notification";
 
 interface AQIData {
     value: number;
@@ -26,6 +30,9 @@ export function AQIStatus({ location }: AQIStatusProps) {
     const [loading, setLoading] = useState(false);
     const [aqiData, setAqiData] = useState<AQIData | null>(null);
     const [city, setCity] = useState<string | undefined>(location);
+    const { notification, showNotification, hideNotification } =
+        useNotifications();
+    const lastNotifiedCity = useRef<string | null>(null);
 
     const getAQIColor = (value: number) => {
         if (value <= 50) return "bg-green-500";
@@ -140,6 +147,15 @@ export function AQIStatus({ location }: AQIStatusProps) {
                                     ) / 10,
                             },
                         });
+                        if (lastNotifiedCity.current !== targetCity) {
+                            showNotification({
+                                title: "Air quality data loaded",
+                                message: `Showing data for ${targetCity}`,
+                                type: "success",
+                                duration: 4000,
+                            });
+                            lastNotifiedCity.current = targetCity;
+                        }
                         return;
                     }
                 }
@@ -204,6 +220,15 @@ export function AQIStatus({ location }: AQIStatusProps) {
                                 ) / 10,
                         },
                     });
+                    if (lastNotifiedCity.current !== targetCity) {
+                        showNotification({
+                            title: "Air quality data loaded",
+                            message: `Showing data for ${targetCity}`,
+                            type: "success",
+                            duration: 4000,
+                        });
+                        lastNotifiedCity.current = targetCity;
+                    }
                     return;
                 }
 
@@ -226,6 +251,15 @@ export function AQIStatus({ location }: AQIStatusProps) {
                     lastUpdated: new Date().toLocaleTimeString(),
                     pollutants: { pm25, pm10, o3, no2 },
                 });
+                if (lastNotifiedCity.current !== targetCity) {
+                    showNotification({
+                        title: "Air quality data loaded",
+                        message: `Showing data for ${targetCity}`,
+                        type: "success",
+                        duration: 4000,
+                    });
+                    lastNotifiedCity.current = targetCity;
+                }
             } catch (e) {
                 if (!cancelled) {
                     console.error(e);
@@ -339,6 +373,10 @@ export function AQIStatus({ location }: AQIStatusProps) {
                     </svg>
                 </div>
             )}
+            <PushNotification
+                notification={notification}
+                onClose={hideNotification}
+            />
             <div className={loading ? "blur-sm pointer-events-none" : ""}>
                 {aqiData ? (
                     <Card className="w-full h-[520px]">
