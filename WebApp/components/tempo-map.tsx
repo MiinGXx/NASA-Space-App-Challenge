@@ -1,13 +1,22 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
 import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
-import type { HeatmapPoint } from "../app/api/tempo/types";
+
+// Type definition for HeatmapPoint (inline since import is causing issues)
+interface HeatmapPoint {
+    lat: number;
+    lng: number;
+    intensity: number;
+}
+
+// Dynamically import all Leaflet components to avoid SSR issues
+const MapContainer = dynamic(() => import("react-leaflet").then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import("react-leaflet").then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import("react-leaflet").then(mod => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import("react-leaflet").then(mod => mod.Popup), { ssr: false });
 
 // Dynamically import HeatmapLayer to avoid SSR issues
 const HeatmapLayer = dynamic(() => import("./HeatmapLayer"), {
@@ -20,18 +29,6 @@ const MapLegend = dynamic(() => import("./map-legend"), {
     ssr: false,
 });
 
-// Fix Leaflet icon issues
-const defaultIcon = L.icon({
-    iconUrl: "/leaflet/marker-icon.png",
-    shadowUrl: "/leaflet/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-});
-
-L.Marker.prototype.options.icon = defaultIcon;
-
 interface TempoMapProps {
     date?: string;
 }
@@ -40,6 +37,23 @@ export default function TempoMap({ date }: TempoMapProps) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [heatmapData, setHeatmapData] = useState<HeatmapPoint[]>([]);
+
+    // Fix Leaflet icon issues on client side only
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            import('leaflet').then((L) => {
+                const defaultIcon = L.default.icon({
+                    iconUrl: "/leaflet/marker-icon.png",
+                    shadowUrl: "/leaflet/marker-shadow.png",
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41],
+                });
+                L.default.Marker.prototype.options.icon = defaultIcon;
+            });
+        }
+    }, []);
 
     // Fetch TEMPO data
     useEffect(() => {
