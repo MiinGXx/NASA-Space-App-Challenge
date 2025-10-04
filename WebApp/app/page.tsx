@@ -13,7 +13,7 @@ import {
     useNotifications,
 } from "@/components/push-notification";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bell, AlertTriangle, CheckCircle, Info } from "lucide-react";
 
@@ -23,6 +23,36 @@ export default function HomePage() {
     const [currentDate, setCurrentDate] = useState<string>(
         new Date().toISOString().split("T")[0]
     );
+
+    // Get browser location and set city on initial load
+    useEffect(() => {
+        if (!currentLocation) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    try {
+                        // Use OpenStreetMap Nominatim for reverse geocoding
+                        const res = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                        );
+                        const data = await res.json();
+                        // Try to get city, town, or village
+                        const city =
+                            data.address.city ||
+                            data.address.town ||
+                            data.address.village ||
+                            data.address.county ||
+                            "";
+                        if (city) {
+                            setCurrentLocation(city);
+                        }
+                    } catch (err) {
+                        // fallback: do nothing
+                    }
+                });
+            }
+        }
+    }, []);
     const { notification, showNotification, hideNotification } =
         useNotifications();
 
