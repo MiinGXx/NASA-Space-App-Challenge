@@ -24,6 +24,7 @@ interface Notification {
 export function HealthGuidance({ location }: HealthGuidanceProps) {
     const [currentAQI, setCurrentAQI] = useState(42); // Default AQI value
     const [activeTab, setActiveTab] = useState("health");
+    const [animatedNotifications, setAnimatedNotifications] = useState<Set<string>>(new Set());
     const [notifications, setNotifications] = useState<Notification[]>([
         {
             id: '1',
@@ -75,6 +76,36 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             setNotifications(prev => [locationNotification, ...prev]);
         }
     }, [location]);
+
+    // Animate notifications when notifications tab is activated
+    useEffect(() => {
+        if (activeTab === 'notifications') {
+            // Clear existing animations first
+            setAnimatedNotifications(new Set());
+            
+            // Animate each notification with a stagger effect
+            notifications.forEach((notification, index) => {
+                setTimeout(() => {
+                    setAnimatedNotifications(prev => new Set([...prev, notification.id]));
+                }, index * 100); // 100ms stagger between each notification
+            });
+        }
+    }, [activeTab]);
+
+    // Animate new notifications when they're added (only if notifications tab is active)
+    useEffect(() => {
+        if (activeTab === 'notifications' && notifications.length > 0) {
+            // Find notifications that aren't animated yet
+            const newNotifications = notifications.filter(n => !animatedNotifications.has(n.id));
+            
+            // Animate only the new notifications
+            newNotifications.forEach((notification, index) => {
+                setTimeout(() => {
+                    setAnimatedNotifications(prev => new Set([...prev, notification.id]));
+                }, index * 100); // 100ms stagger for new notifications
+            });
+        }
+    }, [notifications]);
 
     const getHealthGuidance = (aqi: number) => {
         if (aqi <= 50) {
@@ -267,12 +298,17 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                             <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
                                 {notifications.map((notification) => {
                                     const NotificationIcon = getNotificationIcon(notification.type);
+                                    const isAnimated = animatedNotifications.has(notification.id);
                                     return (
                                         <Alert
                                             key={notification.id}
                                             className={`${getNotificationColor(notification.type, notification.priority)} ${
                                                 !notification.read ? 'border-l-4 border-l-primary' : 'opacity-75'
-                                            } cursor-pointer hover:shadow-md relative w-full`}
+                                            } cursor-pointer hover:shadow-md relative w-full transform transition-all duration-500 ease-out ${
+                                                isAnimated 
+                                                    ? 'translate-x-0 opacity-100 scale-100' 
+                                                    : 'translate-x-full opacity-0 scale-95'
+                                            }`}
                                             onClick={() => markAsRead(notification.id)}
                                         >
                                             <NotificationIcon className={`h-4 w-4 ${getNotificationTextColor(notification.type, notification.priority)}`} />
