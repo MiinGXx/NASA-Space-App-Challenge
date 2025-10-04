@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "leaflet/dist/leaflet.css";
 
 /* Removed @custom-variant dark as it is not a standard CSS at-rule */
 
@@ -123,6 +124,15 @@
     body {
         background-color: var(--background);
         color: var(--foreground);
+        background-image: url('/light.jpeg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+    
+    .dark body {
+        background-image: url('/dark.jpeg');
     }
 }
 
@@ -137,6 +147,11 @@ html.theme-transition *:before,
 html.theme-transition *:after {
     transition: all 0.5s ease-in-out !important;
     transition-delay: 0 !important;
+}
+
+/* Background image transition for theme changes */
+body {
+    transition: background-image 0.5s ease-in-out;
 }
 
 /* AQI Container hover glow effect */
@@ -171,6 +186,8 @@ html.theme-transition *:after {
 
 /* Leaflet Map Styles */
 .leaflet-container {
+    height: 100% !important;
+    width: 100% !important;
     z-index: 0;
 }
 
@@ -189,4 +206,30 @@ html.theme-transition *:after {
 
 .leaflet-pane.leaflet-marker-pane {
     z-index: 450 !important;
+}
+
+/* Fix for map tiles not loading properly */
+.leaflet-tile-container {
+    transform: none !important;
+}
+
+/* Ensure map container has proper dimensions */
+.leaflet-map-pane {
+    left: 0 !important;
+    top: 0 !important;
+}
+
+/* Fallback marker styles in case icons don't load */
+.leaflet-marker-icon {
+    background: #3388ff !important;
+    border-radius: 50% !important;
+    border: 2px solid white !important;
+}
+
+/* Custom pollution marker styles */
+.pollution-marker {
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(51,136,255,1) 100%) !important;
+    border-radius: 50% !important;
+    border: 2px solid white !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
 }

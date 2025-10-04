@@ -112,7 +112,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: CheckCircle,
                 color: "text-green-600",
-                bgColor: "bg-green-500/20 backdrop-blur-sm",
+                bgColor: "backdrop-blur-md bg-green-500/20 dark:bg-green-500/15",
                 borderColor: "border-green-500/30",
                 title: "Good Air Quality",
                 description:
@@ -127,7 +127,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: Shield,
                 color: "text-yellow-600",
-                bgColor: "bg-yellow-500/20 backdrop-blur-sm",
+                bgColor: "backdrop-blur-md bg-yellow-500/20 dark:bg-yellow-500/15",
                 borderColor: "border-yellow-500/30",
                 title: "Moderate Air Quality",
                 description:
@@ -142,7 +142,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: AlertTriangle,
                 color: "text-red-600",
-                bgColor: "bg-red-500/20 backdrop-blur-sm",
+                bgColor: "backdrop-blur-md bg-red-500/20 dark:bg-red-500/15",
                 borderColor: "border-red-500/30",
                 title: "Unhealthy Air Quality",
                 description:
@@ -189,9 +189,9 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
     };
 
     const getNotificationColor = (type: Notification['type'], priority: Notification['priority']) => {
-        if (priority === 'high') return "bg-red-500/20 backdrop-blur-sm border-red-500/30";
-        if (type === 'warning') return "bg-yellow-500/20 backdrop-blur-sm border-yellow-500/30";
-        return "bg-blue-500/20 backdrop-blur-sm border-blue-500/30";
+        if (priority === 'high') return "backdrop-blur-md bg-red-500/20 dark:bg-red-500/15 border-red-500/50";
+        if (type === 'warning') return "backdrop-blur-md bg-yellow-500/20 dark:bg-yellow-500/15 border-yellow-500/50";
+        return "backdrop-blur-md bg-blue-500/20 dark:bg-blue-500/15 border-blue-500/50";
     };
 
     const getNotificationTextColor = (type: Notification['type'], priority: Notification['priority']) => {
@@ -330,12 +330,12 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                                                             <Clock className="h-3 w-3" />
                                                             <span>{formatTimeAgo(notification.timestamp)}</span>
                                                             <span 
-                                                                className={`text-xs px-2 py-1 rounded-md font-medium border ${
+                                                                className={`text-xs px-2 py-1 rounded-md font-medium border backdrop-blur-sm bg-white/20 dark:bg-black/20 ${
                                                                     notification.priority === 'high' 
-                                                                        ? 'bg-red-100 border-red-300 dark:bg-red-500/20 dark:border-red-500/30' 
+                                                                        ? 'border-red-500/50' 
                                                                         : notification.priority === 'medium' 
-                                                                            ? 'bg-yellow-100 border-yellow-300 dark:bg-yellow-500/20 dark:border-yellow-500/30'
-                                                                            : 'bg-blue-100 border-blue-300 dark:bg-blue-500/20 dark:border-blue-500/30'
+                                                                            ? 'border-yellow-500/50'
+                                                                            : 'border-blue-500/50'
                                                                 }`}
                                                             >
                                                                 {notification.priority}

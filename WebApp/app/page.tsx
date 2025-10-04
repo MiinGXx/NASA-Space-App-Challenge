@@ -8,6 +8,7 @@ import { HealthGuidance } from "@/components/health-guidance";
 import { Header } from "@/components/header";
 import { LocationSearch } from "@/components/location-search";
 import TempoMap from "@/components/tempo-map";
+import PollutionMap from "@/components/pollution-map";
 import {
     PushNotification,
     useNotifications,
@@ -64,7 +65,7 @@ export default function HomePage() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background/90 backdrop-blur-sm">
             <Header />
             <LocationSearch onSearch={handleSearch} />
             <main className="container mx-auto px-4 py-3 space-y-8">
@@ -80,19 +81,23 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Map Tabs - Interactive Map and TEMPO NO2 Map */}
+                {/* Map Tabs - Interactive Map, TEMPO NO2 Map, and Pollution Heatmap */}
                 <Tabs defaultValue="interactive" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
+                    <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="interactive">
                             Interactive Map
                         </TabsTrigger>
                         <TabsTrigger value="tempo">TEMPO NO2 Map</TabsTrigger>
+                        <TabsTrigger value="pollution">Pollution Heatmap</TabsTrigger>
                     </TabsList>
                     <TabsContent value="interactive" className="mt-4">
                         <InteractiveMap location={currentLocation} />
                     </TabsContent>
                     <TabsContent value="tempo" className="mt-4">
                         <TempoMap date={currentDate} />
+                    </TabsContent>
+                    <TabsContent value="pollution" className="mt-4">
+                        <PollutionMap location={currentLocation} />
                     </TabsContent>
                 </Tabs>
 

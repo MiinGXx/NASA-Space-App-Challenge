@@ -10,6 +10,10 @@ interface LegendProps {
     minLabel: string;
     maxLabel: string;
     position: "topleft" | "topright" | "bottomleft" | "bottomright";
+    width?: number;
+    height?: number;
+    fontSize?: number;
+    aqiLabels?: string[];
 }
 
 // Create a custom Leaflet control for the legend
@@ -19,6 +23,10 @@ const MapLegend = ({
     minLabel,
     maxLabel,
     position = "bottomright",
+    width = 300,
+    height = 15,
+    fontSize = 12,
+    aqiLabels,
 }: LegendProps) => {
     const map = useMap();
 
@@ -29,43 +37,64 @@ const MapLegend = ({
         // Add content to the control when it's added to the map
         legend.onAdd = () => {
             const div = L.DomUtil.create("div", "info legend");
-            div.style.backgroundColor = "white";
-            div.style.padding = "6px 8px";
-            div.style.border = "1px solid #ccc";
-            div.style.borderRadius = "4px";
-            div.style.lineHeight = "18px";
+            div.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+            div.style.backdropFilter = "blur(12px)";
+            div.style.padding = "8px 10px";
+            div.style.border = "1px solid rgba(255, 255, 255, 0.2)";
+            div.style.borderRadius = "6px";
+            div.style.lineHeight = "16px";
             div.style.fontFamily = "Arial, Helvetica, sans-serif";
             div.style.fontSize = "12px";
+            div.style.minWidth = `${width + 100}px`; // Make it wider horizontally
 
             // Add the title
             const titleDiv = document.createElement("div");
             titleDiv.innerHTML = `<strong>${title}</strong>`;
-            titleDiv.style.marginBottom = "5px";
+            titleDiv.style.marginBottom = "4px";
+            titleDiv.style.fontSize = `${fontSize}px`;
+            titleDiv.style.color = "#000000"; // Force black text
+            titleDiv.style.textAlign = "center";
             div.appendChild(titleDiv);
 
             // Create the gradient display
             const gradientDiv = document.createElement("div");
             gradientDiv.style.width = "100%";
-            gradientDiv.style.height = "20px";
+            gradientDiv.style.height = `${height}px`;
             gradientDiv.style.background = `linear-gradient(to right, ${gradientColors.join(
                 ", "
             )})`;
-            gradientDiv.style.marginBottom = "5px";
+            gradientDiv.style.marginBottom = "4px";
+            gradientDiv.style.borderRadius = "2px";
+            gradientDiv.style.border = "1px solid #ddd";
             div.appendChild(gradientDiv);
 
-            // Create labels
+            // Create AQI labels if provided, otherwise use simple min/max labels
             const labelsDiv = document.createElement("div");
             labelsDiv.style.display = "flex";
             labelsDiv.style.justifyContent = "space-between";
+            labelsDiv.style.fontSize = `${fontSize - 1}px`;
+            labelsDiv.style.color = "#666";
 
-            const minDiv = document.createElement("div");
-            minDiv.innerHTML = minLabel;
+            if (aqiLabels && aqiLabels.length > 0) {
+                // Create individual labels for each AQI range
+                aqiLabels.forEach((label, index) => {
+                    const labelDiv = document.createElement("div");
+                    labelDiv.innerHTML = label;
+                    labelDiv.style.flex = "1";
+                    labelDiv.style.textAlign = index === 0 ? "left" : index === aqiLabels.length - 1 ? "right" : "center";
+                    labelsDiv.appendChild(labelDiv);
+                });
+            } else {
+                // Fallback to simple min/max labels
+                const minDiv = document.createElement("div");
+                minDiv.innerHTML = minLabel;
 
-            const maxDiv = document.createElement("div");
-            maxDiv.innerHTML = maxLabel;
+                const maxDiv = document.createElement("div");
+                maxDiv.innerHTML = maxLabel;
 
-            labelsDiv.appendChild(minDiv);
-            labelsDiv.appendChild(maxDiv);
+                labelsDiv.appendChild(minDiv);
+                labelsDiv.appendChild(maxDiv);
+            }
             div.appendChild(labelsDiv);
 
             return div;
@@ -78,7 +107,7 @@ const MapLegend = ({
         return () => {
             legend.remove();
         };
-    }, [map, title, gradientColors, minLabel, maxLabel, position]);
+    }, [map, title, gradientColors, minLabel, maxLabel, position, width, height, fontSize, aqiLabels]);
 
     // This component doesn't render anything directly to React
     return null;
