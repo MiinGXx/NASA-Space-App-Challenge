@@ -1,6 +1,30 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Chatbot specific styles */
+.chatbot-fade-in {
+    animation: chatbot-fade-in 0.3s ease-out;
+}
+
+.chatbot-float {
+    transition: transform 0.2s ease-in-out;
+}
+
+.chatbot-float:hover {
+    transform: scale(1.05);
+}
+
+@keyframes chatbot-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* Removed @custom-variant dark as it is not a standard CSS at-rule */
 
 :root {
