@@ -59,8 +59,10 @@ export function AQIStatus({ location }: AQIStatusProps) {
         if (location) {
             (async () => {
                 try {
-                    const res = await fetch(`/api/weather?q=${encodeURIComponent(location)}`);
-                    if (!res.ok) throw new Error('Failed to fetch');
+                    const res = await fetch(
+                        `/api/weather?q=${encodeURIComponent(location)}`
+                    );
+                    if (!res.ok) throw new Error("Failed to fetch");
                     const json = await res.json();
 
                     const air = json.air_quality || null;
@@ -69,7 +71,10 @@ export function AQIStatus({ location }: AQIStatusProps) {
                         // check direct current us_aqi
                         const currentUsAqi = air.current?.us_aqi ?? null;
                         const usHourly = air.hourly?.us_aqi ?? null;
-                        if (currentUsAqi != null || (Array.isArray(usHourly) && usHourly.length)) {
+                        if (
+                            currentUsAqi != null ||
+                            (Array.isArray(usHourly) && usHourly.length)
+                        ) {
                             let aqiVal: number | null = null;
                             let pm25 = 0;
                             let pm10 = 0;
@@ -79,7 +84,10 @@ export function AQIStatus({ location }: AQIStatusProps) {
                             }
 
                             let nearestIdx = 0;
-                            if (Array.isArray(usHourly) && Array.isArray(air.hourly.time)) {
+                            if (
+                                Array.isArray(usHourly) &&
+                                Array.isArray(air.hourly.time)
+                            ) {
                                 // find nearest index
                                 const times: string[] = air.hourly.time || [];
                                 const now = new Date();
@@ -92,15 +100,28 @@ export function AQIStatus({ location }: AQIStatusProps) {
                                         nearestIdx = i;
                                     }
                                 }
-                                pm25 = Math.round((air.hourly.pm2_5?.[nearestIdx] || 0) * 10) / 10;
-                                pm10 = Math.round((air.hourly.pm10?.[nearestIdx] || 0) * 10) / 10;
+                                pm25 =
+                                    Math.round(
+                                        (air.hourly.pm2_5?.[nearestIdx] || 0) *
+                                            10
+                                    ) / 10;
+                                pm10 =
+                                    Math.round(
+                                        (air.hourly.pm10?.[nearestIdx] || 0) *
+                                            10
+                                    ) / 10;
                                 if (aqiVal == null) {
-                                    const usVal = air.hourly.us_aqi?.[nearestIdx] ?? null;
-                                    aqiVal = usVal != null ? Number(usVal) : null;
+                                    const usVal =
+                                        air.hourly.us_aqi?.[nearestIdx] ?? null;
+                                    aqiVal =
+                                        usVal != null ? Number(usVal) : null;
                                 }
                             }
 
-                            const finalAqi = aqiVal == null ? 0 : Math.min(500, Number(aqiVal));
+                            const finalAqi =
+                                aqiVal == null
+                                    ? 0
+                                    : Math.min(500, Number(aqiVal));
                             setAqiData({
                                 value: finalAqi,
                                 level: getAQILevel(finalAqi),
@@ -109,8 +130,17 @@ export function AQIStatus({ location }: AQIStatusProps) {
                                 pollutants: {
                                     pm25,
                                     pm10,
-                                    o3: Math.round((air.hourly?.ozone?.[nearestIdx] || 0) * 10) / 10,
-                                    no2: Math.round((air.hourly?.nitrogen_dioxide?.[nearestIdx] || 0) * 10) / 10,
+                                    o3:
+                                        Math.round(
+                                            (air.hourly?.ozone?.[nearestIdx] ||
+                                                0) * 10
+                                        ) / 10,
+                                    no2:
+                                        Math.round(
+                                            (air.hourly?.nitrogen_dioxide?.[
+                                                nearestIdx
+                                            ] || 0) * 10
+                                        ) / 10,
                                 },
                             });
                             return;
@@ -118,7 +148,11 @@ export function AQIStatus({ location }: AQIStatusProps) {
                     }
 
                     // If API provided computed AQI, use it directly
-                    if (air && (air.aqi_current !== undefined || (air.hourly && air.hourly.aqi))) {
+                    if (
+                        air &&
+                        (air.aqi_current !== undefined ||
+                            (air.hourly && air.hourly.aqi))
+                    ) {
                         let aqiVal = null;
                         let pm25 = 0;
                         let pm10 = 0;
@@ -140,25 +174,41 @@ export function AQIStatus({ location }: AQIStatusProps) {
                                     nearestIdx = i;
                                 }
                             }
-                            pm25 = Math.round((air.hourly.pm2_5?.[nearestIdx] || 0) * 10) / 10;
-                            pm10 = Math.round((air.hourly.pm10?.[nearestIdx] || 0) * 10) / 10;
+                            pm25 =
+                                Math.round(
+                                    (air.hourly.pm2_5?.[nearestIdx] || 0) * 10
+                                ) / 10;
+                            pm10 =
+                                Math.round(
+                                    (air.hourly.pm10?.[nearestIdx] || 0) * 10
+                                ) / 10;
                             if (aqiVal == null && air.hourly.aqi) {
                                 aqiVal = air.hourly.aqi[nearestIdx] ?? null;
                             }
                         }
 
-                        const finalAqi = aqiVal == null ? 0 : Math.min(500, Number(aqiVal));
+                        const finalAqi =
+                            aqiVal == null ? 0 : Math.min(500, Number(aqiVal));
                         setAqiData({
                             value: finalAqi,
                             level: getAQILevel(finalAqi),
                             location: location,
                             lastUpdated: new Date().toLocaleTimeString(),
-                               pollutants: {
-                                   pm25,
-                                   pm10,
-                                   o3: Math.round((air.hourly?.ozone?.[nearestIdx] || 0) * 10) / 10,
-                                   no2: Math.round((air.hourly?.nitrogen_dioxide?.[nearestIdx] || 0) * 10) / 10,
-                               },
+                            pollutants: {
+                                pm25,
+                                pm10,
+                                o3:
+                                    Math.round(
+                                        (air.hourly?.ozone?.[nearestIdx] || 0) *
+                                            10
+                                    ) / 10,
+                                no2:
+                                    Math.round(
+                                        (air.hourly?.nitrogen_dioxide?.[
+                                            nearestIdx
+                                        ] || 0) * 10
+                                    ) / 10,
+                            },
                         });
                         return;
                     }
@@ -168,12 +218,19 @@ export function AQIStatus({ location }: AQIStatusProps) {
                         const current = json.weather.current_weather || {};
                         const temp = current.temperature || 0;
                         const wind = current.windspeed || 0;
-                        const pm25 = Math.round(Math.max(1, temp * 0.3) * 10) / 10;
-                        const pm10 = Math.round(Math.max(1, temp * 0.6) * 10) / 10;
-                        const o3 = Math.round(Math.max(1, temp * 1.0) * 10) / 10;
-                        const no2 = Math.round(Math.max(1, wind * 0.5) * 10) / 10;
+                        const pm25 =
+                            Math.round(Math.max(1, temp * 0.3) * 10) / 10;
+                        const pm10 =
+                            Math.round(Math.max(1, temp * 0.6) * 10) / 10;
+                        const o3 =
+                            Math.round(Math.max(1, temp * 1.0) * 10) / 10;
+                        const no2 =
+                            Math.round(Math.max(1, wind * 0.5) * 10) / 10;
 
-                        const aqiVal = Math.min(500, Math.round(pm25 * 3 + pm10 * 0.5));
+                        const aqiVal = Math.min(
+                            500,
+                            Math.round(pm25 * 3 + pm10 * 0.5)
+                        );
                         setAqiData({
                             value: aqiVal,
                             level: getAQILevel(aqiVal),
@@ -243,7 +300,7 @@ export function AQIStatus({ location }: AQIStatusProps) {
 
                 {/* Pollutant Breakdown */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-3 bg-muted rounded-lg">
+                    <div className="text-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
                         <div className="text-lg font-semibold text-foreground">
                             {aqiData.pollutants.pm25}
                         </div>
@@ -251,7 +308,7 @@ export function AQIStatus({ location }: AQIStatusProps) {
                             PM2.5 μg/m³
                         </div>
                     </div>
-                    <div className="text-center p-3 bg-muted rounded-lg">
+                    <div className="text-center p-3 bg-gray-200 dark:bg-gray-700 rounded-lg">
                         <div className="text-lg font-semibold text-foreground">
                             {aqiData.pollutants.pm10}
                         </div>
@@ -259,7 +316,7 @@ export function AQIStatus({ location }: AQIStatusProps) {
                             PM10 μg/m³
                         </div>
                     </div>
-                    <div className="text-center p-3 bg-muted rounded-lg">
+                    <div className="text-center p-3 bg-gray-200 dark:bg-gray-700 rounded-lg">
                         <div className="text-lg font-semibold text-foreground">
                             {aqiData.pollutants.o3}
                         </div>
@@ -267,7 +324,7 @@ export function AQIStatus({ location }: AQIStatusProps) {
                             O₃ μg/m³
                         </div>
                     </div>
-                    <div className="text-center p-3 bg-muted rounded-lg">
+                    <div className="text-center p-3 bg-gray-200 dark:bg-gray-700 rounded-lg">
                         <div className="text-lg font-semibold text-foreground">
                             {aqiData.pollutants.no2}
                         </div>
