@@ -95,7 +95,10 @@ export default function HomePage() {
     };
 
     return (
-        <div className="min-h-screen bg-background/90 backdrop-blur-sm">
+        <div
+            className="min-h-screen bg-background/90 backdrop-blur-sm"
+            onContextMenu={(e) => e.preventDefault()}
+        >
             <Header />
             <LocationSearch onSearch={handleSearch} />
             <main className="container mx-auto px-4 py-3 space-y-8">
