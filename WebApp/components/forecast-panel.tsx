@@ -46,6 +46,7 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
     const [hourlyForecast, setHourlyForecast] = useState<HourlyData[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState("weekly");
 
     // Update forecast data when location changes (or on mount). If no location is provided,
     // call the API without a query so the server can use its default.
@@ -257,18 +258,31 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <Tabs defaultValue="weekly" className="w-full">
+                <Tabs
+                    value={activeTab}
+                    onValueChange={setActiveTab}
+                    defaultValue="weekly"
+                    className="w-full"
+                >
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger
                             value="weekly"
-                            className="flex items-center gap-2"
+                            className={`flex items-center gap-2 transition-colors duration-200 ${
+                                activeTab === "weekly"
+                                    ? "bg-white/70 border-white/50 dark:bg-white/10 text-foreground rounded-lg shadow"
+                                    : ""
+                            }`}
                         >
                             <Calendar className="h-4 w-4" />
                             Forecast
                         </TabsTrigger>
                         <TabsTrigger
                             value="hourly"
-                            className="flex items-center gap-2"
+                            className={`flex items-center gap-2 transition-colors duration-200 ${
+                                activeTab === "hourly"
+                                    ? "bg-white/70 border-white/50 dark:bg-white/10 text-foreground rounded-lg shadow"
+                                    : ""
+                            }`}
                         >
                             <Clock className="h-4 w-4" />
                             Today's Hourly
