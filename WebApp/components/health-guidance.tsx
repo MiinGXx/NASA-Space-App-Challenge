@@ -288,14 +288,14 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="notifications" className="space-y-3 mt-4">
+                    <TabsContent value="notifications" className="space-y-3 mt-4 overflow-x-hidden">
                         {notifications.length === 0 ? (
                             <div className="text-center py-8">
                                 <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                                 <p className="text-muted-foreground">No notifications</p>
                             </div>
                         ) : (
-                            <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                            <div className="space-y-2 max-h-80 overflow-y-auto overflow-x-hidden pr-1 [scrollbar-width:thin] [scrollbar-color:theme(colors.muted.foreground/0.2)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-thumb]:hover:bg-muted-foreground/40 [&::-webkit-scrollbar-thumb]:rounded-sm [&::-webkit-scrollbar-button]:!hidden [&::-webkit-scrollbar-button:start]:!hidden [&::-webkit-scrollbar-button:end]:!hidden">
                                 {notifications.map((notification) => {
                                     const NotificationIcon = getNotificationIcon(notification.type);
                                     const isAnimated = animatedNotifications.has(notification.id);
@@ -304,7 +304,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                                             key={notification.id}
                                             className={`${getNotificationColor(notification.type, notification.priority)} ${
                                                 !notification.read ? 'border-l-4 border-l-primary' : 'opacity-75'
-                                            } cursor-pointer hover:shadow-md relative w-full transform transition-all duration-500 ease-out ${
+                                            } cursor-pointer hover:shadow-md transition-all duration-500 ease-out ${
                                                 isAnimated 
                                                     ? 'translate-x-0 opacity-100 scale-100' 
                                                     : 'translate-x-full opacity-0 scale-95'
