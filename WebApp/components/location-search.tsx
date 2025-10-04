@@ -20,16 +20,16 @@ export function LocationSearch({ onSearch }: SearchBarProps) {
     };
 
     return (
-        <div className="bg-card py-4 w-full">
+        <div className="backdrop-blur-md bg-white/10 border-b border-white/20 dark:border-white/10 py-4 w-full">
             <div className="container px-4 py-2 mx-auto">
                 <form onSubmit={handleSubmit} className="flex gap-2 w-full">
-                    <div className="relative flex-1 bg-muted rounded-md">
+                    <div className="relative flex-1 backdrop-blur-sm bg-white/20  rounded-md border border-white/30 dark:border-white/20">
                         <Input
                             type="text"
                             placeholder="Search for a location..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 h-10 w-full bg-transparent"
+                            className="pl-10 h-10 w-full bg-transparent border-0"
                         />
                         <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                     </div>

@@ -29,13 +29,15 @@ const MapLegend = ({
         // Add content to the control when it's added to the map
         legend.onAdd = () => {
             const div = L.DomUtil.create("div", "info legend");
-            div.style.backgroundColor = "white";
+            div.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+            div.style.backdropFilter = "blur(12px)";
             div.style.padding = "6px 8px";
-            div.style.border = "1px solid #ccc";
+            div.style.border = "1px solid rgba(255, 255, 255, 0.2)";
             div.style.borderRadius = "4px";
             div.style.lineHeight = "18px";
             div.style.fontFamily = "Arial, Helvetica, sans-serif";
             div.style.fontSize = "12px";
+            div.style.boxShadow = "0 25px 50px -12px rgba(0, 0, 0, 0.25)";
 
             // Add the title
             const titleDiv = document.createElement("div");
