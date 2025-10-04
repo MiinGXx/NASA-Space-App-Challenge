@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Bell, AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,12 @@ interface PushNotificationProps {
 export function PushNotification({ notification, onClose }: PushNotificationProps) {
     const [isVisible, setIsVisible] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
 
     useEffect(() => {
         if (notification) {
@@ -72,52 +79,59 @@ export function PushNotification({ notification, onClose }: PushNotificationProp
     const getBackgroundColor = () => {
         switch (notification?.type) {
             case "success":
-                return "bg-green-500/10 border-green-500/20 backdrop-blur-sm";
+                return "border-green-500/30 shadow-green-500/20";
             case "warning":
-                return "bg-yellow-500/10 border-yellow-500/20 backdrop-blur-sm";
+                return "border-yellow-500/30 shadow-yellow-500/20";
             case "error":
-                return "bg-red-500/10 border-red-500/20 backdrop-blur-sm";
+                return "border-red-500/30 shadow-red-500/20";
             default:
-                return "bg-blue-500/10 border-blue-500/20 backdrop-blur-sm";
+                return "border-blue-500/30 shadow-blue-500/20";
         }
     };
 
-    if (!isVisible || !notification) {
+    if (!isVisible || !notification || !mounted) {
         return null;
     }
 
-    return (
-        <div className="fixed top-4 right-0 z-50 pointer-events-none">
-            <div
-                className={cn(
-                    "w-80 max-w-sm p-4 rounded-lg border shadow-lg pointer-events-auto transform transition-all duration-500 ease-out mr-4",
-                    getBackgroundColor(),
-                    isAnimating
-                        ? "translate-x-0 opacity-100"
-                        : "translate-x-full opacity-0"
-                )}
-            >
-                <div className="flex items-start gap-3">
-                    {getIcon()}
-                    <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold !text-black dark:!text-white mb-1">
-                            {notification.title}
-                        </h4>
-                        <p className="text-sm !text-gray-800 dark:!text-gray-200">
-                            {notification.message}
-                        </p>
+    const notificationElement = (
+        <div 
+            className="fixed inset-0 z-[9999] pointer-events-none"
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+        >
+            <div className="absolute top-4 right-4 pointer-events-none">
+                <div
+                    className={cn(
+                        "notification-glass w-80 max-w-sm p-4 rounded-xl shadow-2xl pointer-events-auto transform transition-all duration-500 ease-out",
+                        getBackgroundColor(),
+                        isAnimating
+                            ? "translate-x-0 opacity-100 scale-100"
+                            : "translate-x-full opacity-0 scale-95"
+                    )}
+                >
+                    <div className="flex items-start gap-3">
+                        {getIcon()}
+                        <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-semibold !text-black dark:!text-white mb-1">
+                                {notification.title}
+                            </h4>
+                            <p className="text-sm !text-gray-800 dark:!text-gray-200">
+                                {notification.message}
+                            </p>
+                        </div>
+                        <button
+                            onClick={handleClose}
+                            className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                            aria-label="Close notification"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
                     </div>
-                    <button
-                        onClick={handleClose}
-                        className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                        aria-label="Close notification"
-                    >
-                        <X className="h-4 w-4" />
-                    </button>
                 </div>
             </div>
         </div>
     );
+
+    return createPortal(notificationElement, document.body);
 }
 
 // Hook for managing notifications
