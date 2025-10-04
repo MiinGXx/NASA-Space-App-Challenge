@@ -8,7 +8,10 @@ import { HealthGuidance } from "@/components/health-guidance";
 import { Header } from "@/components/header";
 import { LocationSearch } from "@/components/location-search";
 import TempoMap from "@/components/tempo-map";
-import { PushNotification, useNotifications } from "@/components/push-notification";
+import {
+    PushNotification,
+    useNotifications,
+} from "@/components/push-notification";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,33 +22,40 @@ export default function HomePage() {
     const [currentDate, setCurrentDate] = useState<string>(
         new Date().toISOString().split("T")[0]
     );
-    const { notification, showNotification, hideNotification } = useNotifications();
+    const { notification, showNotification, hideNotification } =
+        useNotifications();
 
     const handleSearch = (location: string) => {
         console.log("Searching for location:", location);
         setCurrentLocation(location);
     };
 
-    const triggerNotification = (type: "info" | "success" | "warning" | "error") => {
+    const triggerNotification = (
+        type: "info" | "success" | "warning" | "error"
+    ) => {
         const notifications = {
             info: {
                 title: "Air Quality Update",
-                message: "Air quality data has been refreshed for your location.",
+                message:
+                    "Air quality data has been refreshed for your location.",
                 type: "info" as const,
             },
             success: {
                 title: "Location Found",
-                message: "Successfully updated air quality data for your selected location.",
+                message:
+                    "Successfully updated air quality data for your selected location.",
                 type: "success" as const,
             },
             warning: {
                 title: "Air Quality Alert",
-                message: "Air quality is approaching unhealthy levels in your area.",
+                message:
+                    "Air quality is approaching unhealthy levels in your area.",
                 type: "warning" as const,
             },
             error: {
                 title: "Data Error",
-                message: "Unable to fetch air quality data. Please try again later.",
+                message:
+                    "Unable to fetch air quality data. Please try again later.",
                 type: "error" as const,
             },
         };
@@ -73,7 +83,9 @@ export default function HomePage() {
                 {/* Map Tabs - Interactive Map and TEMPO NO2 Map */}
                 <Tabs defaultValue="interactive" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="interactive">Interactive Map</TabsTrigger>
+                        <TabsTrigger value="interactive">
+                            Interactive Map
+                        </TabsTrigger>
                         <TabsTrigger value="tempo">TEMPO NO2 Map</TabsTrigger>
                     </TabsList>
                     <TabsContent value="interactive" className="mt-4">
@@ -92,9 +104,12 @@ export default function HomePage() {
                 {/* Notification Demo Buttons - Bottom of page */}
                 <div className="w-full py-8 border-t border-border">
                     <div className="text-center mb-4">
-                        <h3 className="text-lg font-semibold mb-2">Push Notification Demo</h3>
+                        <h3 className="text-lg font-semibold mb-2">
+                            Push Notification Demo
+                        </h3>
                         <p className="text-sm text-muted-foreground mb-4">
-                            Click any button below to test the push notification component
+                            Click any button below to test the push notification
+                            component
                         </p>
                     </div>
                     <div className="flex flex-wrap justify-center gap-4">
