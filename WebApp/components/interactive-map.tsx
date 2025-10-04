@@ -43,23 +43,25 @@ export function InteractiveMap({ location }: Props) {
         try {
             setStatus("loading");
             
-            // Update the debug settings via API
-            const response = await fetch("/api/tempo/debug-settings", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(settings),
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to update debug settings");
-            }
-
-            const data = await response.json();
-            console.log("Updated settings:", data);
-
-            // Update local state
+            // Update local state directly (API is optional)
             setProductName(settings.productName);
             setTimeRange(settings.timeRange);
+
+            // Try to update via API if available, but don't fail if it's not
+            try {
+                const response = await fetch("/api/tempo/debug-settings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(settings),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("Updated settings via API:", data);
+                }
+            } catch (apiError) {
+                console.log("API not available, using local settings only");
+            }
 
             // Trigger a refresh of the data
             setRefreshTrigger((prev) => prev + 1);
@@ -92,26 +94,25 @@ export function InteractiveMap({ location }: Props) {
     useEffect(() => {
         async function fetchInitialSettings() {
             try {
-                console.log("Fetching initial debug settings...");
+                console.log("Attempting to fetch initial debug settings...");
                 const response = await fetch("/api/tempo/debug-settings");
 
-                if (!response.ok) {
-                    throw new Error(
-                        `Failed to fetch debug settings: ${response.statusText}`
-                    );
+                if (response.ok) {
+                    const settings = await response.json();
+                    console.log("Retrieved initial settings:", settings);
+
+                    // Update local state with server settings
+                    setProductName(settings.productName);
+                    setTimeRange(settings.timeRange);
+
+                    // Force a refresh with these settings
+                    setRefreshTrigger((prev) => prev + 1);
+                } else {
+                    console.log("API not available, using default settings");
                 }
-
-                const settings = await response.json();
-                console.log("Retrieved initial settings:", settings);
-
-                // Update local state with server settings
-                setProductName(settings.productName);
-                setTimeRange(settings.timeRange);
-
-                // Force a refresh with these settings
-                setRefreshTrigger((prev) => prev + 1);
             } catch (err) {
-                console.error("Error fetching initial debug settings:", err);
+                console.log("Debug settings API not available, using defaults:", err);
+                // Component will work with default values
             }
         }
 
