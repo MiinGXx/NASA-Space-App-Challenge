@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Bell, AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 export interface NotificationData {
     id: string;
@@ -20,6 +21,7 @@ interface PushNotificationProps {
 export function PushNotification({ notification, onClose }: PushNotificationProps) {
     const [isVisible, setIsVisible] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
+    const { theme, resolvedTheme } = useTheme();
 
     useEffect(() => {
         if (notification) {
@@ -100,10 +102,20 @@ export function PushNotification({ notification, onClose }: PushNotificationProp
                 <div className="flex items-start gap-3">
                     {getIcon()}
                     <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold !text-black dark:!text-white mb-1">
+                        <h4 
+                            className="text-sm font-semibold mb-1"
+                            style={{
+                                color: resolvedTheme === 'dark' ? '#ffffff' : '#374151'
+                            }}
+                        >
                             {notification.title}
                         </h4>
-                        <p className="text-sm !text-gray-800 dark:!text-gray-200">
+                        <p 
+                            className="text-sm"
+                            style={{
+                                color: resolvedTheme === 'dark' ? '#e5e7eb' : '#6b7280'
+                            }}
+                        >
                             {notification.message}
                         </p>
                     </div>
