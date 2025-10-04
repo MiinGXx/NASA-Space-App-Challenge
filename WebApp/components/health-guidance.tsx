@@ -280,30 +280,30 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                                                 <div className="flex items-start justify-between w-full">
                                                     <div className="space-y-2 flex-1">
                                                         <div className="flex items-center gap-2">
-                                                            <h4 className={`font-semibold text-sm ${getNotificationTextColor(notification.type, notification.priority)}`}>
+                                                            <h4 className={`font-semibold ${getNotificationTextColor(notification.type, notification.priority)}`}>
                                                                 {notification.title}
                                                             </h4>
                                                             {!notification.read && (
                                                                 <div className="w-2 h-2 bg-primary rounded-full" />
                                                             )}
                                                         </div>
-                                                        <p className="text-sm text-muted-foreground">
+                                                        <p className="text-sm">
                                                             {notification.message}
                                                         </p>
                                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                                             <Clock className="h-3 w-3" />
                                                             <span>{formatTimeAgo(notification.timestamp)}</span>
-                                                            <Badge 
-                                                                className={`text-xs px-1 py-0 ${
+                                                            <span 
+                                                                className={`text-xs px-2 py-1 rounded-md font-medium border ${
                                                                     notification.priority === 'high' 
-                                                                        ? 'bg-red-500/20 !text-red-900 dark:!text-red-200 border-red-500/30' 
+                                                                        ? 'bg-red-100 border-red-300 dark:bg-red-500/20 dark:border-red-500/30' 
                                                                         : notification.priority === 'medium' 
-                                                                            ? 'bg-yellow-500/20 !text-yellow-900 dark:!text-yellow-200 border-yellow-500/30'
-                                                                            : 'bg-blue-500/20 !text-blue-900 dark:!text-blue-200 border-blue-500/30'
+                                                                            ? 'bg-yellow-100 border-yellow-300 dark:bg-yellow-500/20 dark:border-yellow-500/30'
+                                                                            : 'bg-blue-100 border-blue-300 dark:bg-blue-500/20 dark:border-blue-500/30'
                                                                 }`}
                                                             >
                                                                 {notification.priority}
-                                                            </Badge>
+                                                            </span>
                                                         </div>
                                                     </div>
                                                     <button
