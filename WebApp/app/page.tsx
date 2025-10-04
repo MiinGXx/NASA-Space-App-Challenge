@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bell, AlertTriangle, CheckCircle, Info } from "lucide-react";
 
 export default function HomePage() {
+    const [activeMapTab, setActiveMapTab] = useState<string>("interactive");
     const [currentLocation, setCurrentLocation] = useState<string>("");
     const [currentDate, setCurrentDate] = useState<string>(
         new Date().toISOString().split("T")[0]
@@ -82,11 +83,29 @@ export default function HomePage() {
 
                 {/* Map Tabs - Interactive Map and TEMPO NO2 Map */}
                 <Tabs defaultValue="interactive" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="interactive">
+                    <TabsList className="grid w-full grid-cols-2 border border-white/50 rounded-lg">
+                        <TabsTrigger
+                            value="interactive"
+                            className={`flex items-center gap-2 transition-colors duration-200 ${
+                                activeMapTab === "interactive"
+                                    ? "bg-white/70 border-white/50 dark:bg-white/10 text-foreground rounded-lg shadow"
+                                    : ""
+                            }`}
+                            onClick={() => setActiveMapTab("interactive")}
+                        >
                             Interactive Map
                         </TabsTrigger>
-                        <TabsTrigger value="tempo">TEMPO NO2 Map</TabsTrigger>
+                        <TabsTrigger
+                            value="tempo"
+                            className={`flex items-center gap-2 transition-colors duration-200 ${
+                                activeMapTab === "tempo"
+                                    ? "bg-white/70 border-white/50 dark:bg-white/10 text-foreground rounded-lg shadow"
+                                    : ""
+                            }`}
+                            onClick={() => setActiveMapTab("tempo")}
+                        >
+                            TEMPO NO2 Map
+                        </TabsTrigger>
                     </TabsList>
                     <TabsContent value="interactive" className="mt-4">
                         <InteractiveMap location={currentLocation} />

@@ -263,14 +263,24 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger
                             value="health"
-                            className="flex items-center gap-2"
+                            className={
+                                `flex items-center gap-2 transition-colors duration-200 ` +
+                                (activeTab === "health"
+                                    ? "bg-white/70 border-white/50 dark:bg-white/10 text-foreground rounded-lg shadow "
+                                    : "")
+                            }
                         >
                             <Heart className="h-4 w-4" />
                             Health
                         </TabsTrigger>
                         <TabsTrigger
                             value="notifications"
-                            className="flex items-center gap-2"
+                            className={
+                                `flex items-center gap-2 transition-colors duration-200 ` +
+                                (activeTab === "notifications"
+                                    ? "bg-white/70 border-white/50 dark:bg-white/10 text-foreground rounded-lg shadow"
+                                    : "")
+                            }
                         >
                             <div className="relative">
                                 <Bell className="h-4 w-4" />
