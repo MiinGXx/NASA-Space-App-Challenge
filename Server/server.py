@@ -184,7 +184,7 @@ try:
 		"longitude": lon,
 		"hourly": ",".join(["pm10", "pm2_5", "us_aqi", "nitrogen_dioxide", "carbon_monoxide", "ozone"]),
 		"current": ",".join(["us_aqi", "uv_index", "uv_index_clear_sky"]),
-		"forecast_days": 1,
+		"forecast_days": 7,
 		"timezone": "auto",
 	}
 	aq_resp = requests.get(aq_url, params=aq_params, timeout=15)

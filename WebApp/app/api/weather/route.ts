@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     // request a US AQI value in the `current` block if available and UV indices
     current: ["us_aqi", "uv_index", "uv_index_clear_sky"].join(","),
     // include a short forecast window
-    forecast_days: "1",
+  forecast_days: "7",
     timezone: "auto",
   });
   const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?${aqParams.toString()}`;

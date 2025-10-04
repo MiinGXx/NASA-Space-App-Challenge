@@ -47,31 +47,53 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Update forecast data when location changes
+    // Update forecast data when location changes (or on mount). If no location is provided,
+    // call the API without a query so the server can use its default.
     useEffect(() => {
-        if (location) {
-            (async () => {
+        (async () => {
                 setLoading(true);
                 setError(null);
                 try {
-                    const res = await fetch(`/api/weather?q=${encodeURIComponent(location)}`);
+                    const url = location ? `/api/weather?q=${encodeURIComponent(location)}` : `/api/weather`;
+                    const res = await fetch(url);
                     if (!res.ok) throw new Error("Failed to fetch weather");
                     const data = await res.json();
 
-                    // Hourly
+                    // Hourly (weather + air quality)
                     const hourly = data.weather.hourly || {};
                     const times: string[] = hourly.time || [];
                     const temps: number[] = hourly.temperature_2m || [];
                     const hums: number[] = hourly.relative_humidity_2m || [];
                     const winds: number[] = hourly.wind_speed_10m || [];
 
-                    const newHourly: HourlyData[] = times.slice(0, 24).map((t: string, i: number) => ({
-                        time: new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        aqi: 0,
-                        pm25: Math.round((hourly.pm2_5?.[i] || 0) * 10) / 10,
-                        pm10: Math.round((hourly.pm10?.[i] || 0) * 10) / 10,
-                        o3: 0,
-                    }));
+                    // air quality hourly arrays live in data.air_quality.hourly
+                    const airHourly = data.air_quality?.hourly || {};
+                    const aqTimes: string[] = airHourly.time || [];
+                    const aqPm25: number[] = airHourly.pm2_5 || [];
+                    const aqPm10: number[] = airHourly.pm10 || [];
+                    // prefer provider us_aqi, fall back to computed aqi if available
+                    const aqAqi: (number | null)[] = airHourly.us_aqi || airHourly.aqi || [];
+
+                    // If the air-quality times exist and differ from weather times, prefer air times
+                    const timeSource = (aqTimes && aqTimes.length) ? aqTimes : times;
+
+                    const newHourly: HourlyData[] = timeSource.slice(0, 24).map((t: string, i: number) => {
+                        // try to find matching weather index by timestamp
+                        let weatherIdx = i;
+                        if (times && times.length && t && times[0]) {
+                            const iso = (t.length > 10 ? t.slice(0, 19) : t);
+                            const found = times.indexOf(t);
+                            if (found >= 0) weatherIdx = found;
+                        }
+
+                        return {
+                            time: new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                            aqi: (aqAqi?.[i] != null ? Number(aqAqi[i]) : 0),
+                            pm25: Math.round(((aqPm25?.[i] || 0)) * 10) / 10,
+                            pm10: Math.round(((aqPm10?.[i] || 0)) * 10) / 10,
+                            o3: Math.round(((airHourly.ozone?.[i] || 0)) * 10) / 10,
+                        };
+                    });
 
                     setHourlyForecast(newHourly);
 
@@ -81,15 +103,44 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
                     const tMax: number[] = daily.temperature_2m_max || [];
                     const tMin: number[] = daily.temperature_2m_min || [];
 
-                    const newWeekly: ForecastData[] = dTimes.slice(0, 7).map((d: string, i: number) => ({
-                        date: d,
-                        day: i === 0 ? 'Today' : new Date(d).toLocaleDateString(undefined, { weekday: 'short' }),
-                        aqi: 0,
-                        level: 'Unknown',
-                        temperature: Math.round(((tMax[i] || 0) + (tMin[i] || 0)) / 2),
-                        humidity: Math.round(hums?.[i] || 0),
-                        windSpeed: Math.round(winds?.[i] || 0),
-                    }));
+                    // helper to get YYYY-MM-DD from ISO string
+                    const isoDay = (iso: string) => iso.slice(0, 10);
+
+                    const newWeekly: ForecastData[] = dTimes.slice(0, 7).map((d: string, i: number) => {
+                        // find hourly indices that match this day in air quality times
+                        const dayKey = d;
+                        const indices = aqTimes
+                            .map((at, idx) => ({ at, idx }))
+                            .filter(({ at }) => isoDay(at) === dayKey)
+                            .map(({ idx }) => idx);
+
+                        // compute daily AQI as the max AQI value for the day (or 0)
+                        let dayAqi = 0;
+                        if (indices.length && aqAqi && aqAqi.length) {
+                            const vals = indices.map((ii) => (aqAqi[ii] != null ? Number(aqAqi[ii]) : 0));
+                            dayAqi = vals.length ? Math.max(...vals) : 0;
+                        }
+
+                        // map AQI to level
+                        const getAQILevelLocal = (value: number) => {
+                            if (value <= 50) return "Good";
+                            if (value <= 100) return "Moderate";
+                            if (value <= 150) return "Unhealthy for Sensitive Groups";
+                            if (value <= 200) return "Unhealthy";
+                            if (value <= 300) return "Very Unhealthy";
+                            return "Hazardous";
+                        };
+
+                        return {
+                            date: d,
+                            day: i === 0 ? "Today" : new Date(d).toLocaleDateString(undefined, { weekday: "short" }),
+                            aqi: dayAqi,
+                            level: getAQILevelLocal(dayAqi),
+                            temperature: Math.round(((tMax[i] || 0) + (tMin[i] || 0)) / 2),
+                            humidity: Math.round(hums?.[i] || 0),
+                            windSpeed: Math.round(winds?.[i] || 0),
+                        };
+                    });
 
                     setWeeklyForecast(newWeekly);
                 } catch (e: any) {
@@ -99,7 +150,6 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
                     setLoading(false);
                 }
             })();
-        }
     }, [location]);
 
     const getAQIColor = (value: number) => {
