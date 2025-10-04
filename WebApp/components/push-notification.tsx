@@ -76,16 +76,16 @@ export function PushNotification({ notification, onClose }: PushNotificationProp
         }
     };
 
-    const getBackgroundColor = () => {
+    const getBorderColor = () => {
         switch (notification?.type) {
             case "success":
-                return "border-green-500/30 shadow-green-500/20";
+                return "border-green-500/50";
             case "warning":
-                return "border-yellow-500/30 shadow-yellow-500/20";
+                return "border-yellow-500/50";
             case "error":
-                return "border-red-500/30 shadow-red-500/20";
+                return "border-red-500/50";
             default:
-                return "border-blue-500/30 shadow-blue-500/20";
+                return "border-blue-500/50";
         }
     };
 
@@ -101,8 +101,8 @@ export function PushNotification({ notification, onClose }: PushNotificationProp
             <div className="absolute top-4 right-4 pointer-events-none">
                 <div
                     className={cn(
-                        "notification-glass w-80 max-w-sm p-4 rounded-xl shadow-2xl pointer-events-auto transform transition-all duration-500 ease-out",
-                        getBackgroundColor(),
+                        "backdrop-blur-md bg-white/10 dark:bg-black/10 w-80 max-w-sm p-4 rounded-xl shadow-2xl pointer-events-auto transform transition-all duration-500 ease-out border border-white/20 dark:border-white/10",
+                        getBorderColor(),
                         isAnimating
                             ? "translate-x-0 opacity-100 scale-100"
                             : "translate-x-full opacity-0 scale-95"
