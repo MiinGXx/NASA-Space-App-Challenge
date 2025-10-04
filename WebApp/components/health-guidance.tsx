@@ -266,7 +266,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                             className={
                                 `flex items-center gap-2 transition-colors duration-200 ` +
                                 (activeTab === "health"
-                                    ? "bg-white/70 border-white/50 dark:bg-white/10 text-foreground rounded-lg shadow "
+                                    ? "bg-white/70 border-white/50 dark:bg-white/10 text-foreground rounded-lg shadow"
                                     : "")
                             }
                         >

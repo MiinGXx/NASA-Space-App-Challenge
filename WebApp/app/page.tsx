@@ -88,7 +88,7 @@ export default function HomePage() {
                             value="interactive"
                             className={`flex items-center gap-2 transition-colors duration-200 ${
                                 activeMapTab === "interactive"
-                                    ? "bg-white/70 border-white/50 dark:bg-white/10 text-foreground rounded-lg shadow"
+                                    ? "bg-white/70 border-white/50 dark:bg-white/10 border-white/50 text-foreground rounded-lg shadow"
                                     : ""
                             }`}
                             onClick={() => setActiveMapTab("interactive")}
@@ -99,7 +99,7 @@ export default function HomePage() {
                             value="tempo"
                             className={`flex items-center gap-2 transition-colors duration-200 ${
                                 activeMapTab === "tempo"
-                                    ? "bg-white/70 border-white/50 dark:bg-white/10 text-foreground rounded-lg shadow"
+                                    ? "bg-white/70 border-white/50 dark:bg-white/10 border-white/50 text-foreground rounded-lg shadow"
                                     : ""
                             }`}
                             onClick={() => setActiveMapTab("tempo")}
