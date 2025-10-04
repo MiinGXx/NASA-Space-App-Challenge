@@ -100,10 +100,10 @@ export function PushNotification({ notification, onClose }: PushNotificationProp
                 <div className="flex items-start gap-3">
                     {getIcon()}
                     <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                        <h4 className="text-sm font-semibold !text-black dark:!text-white mb-1">
                             {notification.title}
                         </h4>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                        <p className="text-sm !text-gray-800 dark:!text-gray-200">
                             {notification.message}
                         </p>
                     </div>

@@ -81,8 +81,8 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: CheckCircle,
                 color: "text-green-600",
-                bgColor: "bg-green-500/10 backdrop-blur-sm",
-                borderColor: "border-green-500/20",
+                bgColor: "bg-green-500/20 backdrop-blur-sm",
+                borderColor: "border-green-500/30",
                 title: "Good Air Quality",
                 description:
                     "Air quality is satisfactory and poses little or no health risk.",
@@ -96,8 +96,8 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: Shield,
                 color: "text-yellow-600",
-                bgColor: "bg-yellow-500/10 backdrop-blur-sm",
-                borderColor: "border-yellow-500/20",
+                bgColor: "bg-yellow-500/20 backdrop-blur-sm",
+                borderColor: "border-yellow-500/30",
                 title: "Moderate Air Quality",
                 description:
                     "Air quality is acceptable for most people, but sensitive individuals may experience minor issues.",
@@ -111,8 +111,8 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
             return {
                 icon: AlertTriangle,
                 color: "text-red-600",
-                bgColor: "bg-red-500/10 backdrop-blur-sm",
-                borderColor: "border-red-500/20",
+                bgColor: "bg-red-500/20 backdrop-blur-sm",
+                borderColor: "border-red-500/30",
                 title: "Unhealthy Air Quality",
                 description:
                     "Air quality may cause health concerns for sensitive groups.",
@@ -158,9 +158,9 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
     };
 
     const getNotificationColor = (type: Notification['type'], priority: Notification['priority']) => {
-        if (priority === 'high') return "text-red-600 bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800";
-        if (type === 'warning') return "text-yellow-600 bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800";
-        return "text-blue-600 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800";
+        if (priority === 'high') return "text-red-600 bg-red-500/20 backdrop-blur-sm border-red-500/30";
+        if (type === 'warning') return "text-yellow-600 bg-yellow-500/20 backdrop-blur-sm border-yellow-500/30";
+        return "text-blue-600 bg-blue-500/20 backdrop-blur-sm border-blue-500/30";
     };
 
     const formatTimeAgo = (date: Date) => {
@@ -196,8 +196,7 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                                 <Bell className="h-4 w-4" />
                                 {unreadCount > 0 && (
                                     <Badge 
-                                        variant="destructive" 
-                                        className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                                        className="absolute -top-2 -right-2 h-4 w-4 rounded-full p-0 flex items-center justify-center text-[10px] bg-red-500 text-white dark:bg-red-600 dark:text-white"
                                     >
                                         {unreadCount}
                                     </Badge>
@@ -267,47 +266,51 @@ export function HealthGuidance({ location }: HealthGuidanceProps) {
                                             key={notification.id}
                                             className={`${getNotificationColor(notification.type, notification.priority)} ${
                                                 !notification.read ? 'border-l-4 border-l-primary' : 'opacity-75'
-                                            } cursor-pointer transition-all hover:shadow-md relative`}
+                                            } cursor-pointer transition-all hover:shadow-md relative w-full`}
                                             onClick={() => markAsRead(notification.id)}
                                         >
-                                            <div className="flex items-start justify-between w-full">
-                                                <div className="flex items-start gap-2 flex-1">
-                                                    <NotificationIcon className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                                                    <div className="space-y-1 flex-1">
+                                            <NotificationIcon className="h-4 w-4" />
+                                            <AlertDescription className="w-full">
+                                                <div className="flex items-start justify-between w-full">
+                                                    <div className="space-y-2 flex-1">
                                                         <div className="flex items-center gap-2">
-                                                            <h5 className="font-semibold text-sm">
+                                                            <h4 className="font-semibold text-sm">
                                                                 {notification.title}
-                                                            </h5>
+                                                            </h4>
                                                             {!notification.read && (
                                                                 <div className="w-2 h-2 bg-primary rounded-full" />
                                                             )}
                                                         </div>
-                                                        <p className="text-xs text-muted-foreground">
+                                                        <p className="text-sm text-muted-foreground">
                                                             {notification.message}
                                                         </p>
                                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                                             <Clock className="h-3 w-3" />
                                                             <span>{formatTimeAgo(notification.timestamp)}</span>
                                                             <Badge 
-                                                                variant={notification.priority === 'high' ? 'destructive' : 
-                                                                        notification.priority === 'medium' ? 'default' : 'secondary'}
-                                                                className="text-xs px-1 py-0"
+                                                                className={`text-xs px-1 py-0 ${
+                                                                    notification.priority === 'high' 
+                                                                        ? 'bg-red-500/20 !text-red-900 dark:!text-red-200 border-red-500/30' 
+                                                                        : notification.priority === 'medium' 
+                                                                            ? 'bg-yellow-500/20 !text-yellow-900 dark:!text-yellow-200 border-yellow-500/30'
+                                                                            : 'bg-blue-500/20 !text-blue-900 dark:!text-blue-200 border-blue-500/30'
+                                                                }`}
                                                             >
                                                                 {notification.priority}
                                                             </Badge>
                                                         </div>
                                                     </div>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            dismissNotification(notification.id);
+                                                        }}
+                                                        className="ml-2 p-1 hover:bg-background/50 rounded transition-colors flex-shrink-0"
+                                                    >
+                                                        <X className="h-3 w-3" />
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        dismissNotification(notification.id);
-                                                    }}
-                                                    className="ml-2 p-1 hover:bg-background/50 rounded transition-colors"
-                                                >
-                                                    <X className="h-3 w-3" />
-                                                </button>
-                                            </div>
+                                            </AlertDescription>
                                         </Alert>
                                     );
                                 })}
