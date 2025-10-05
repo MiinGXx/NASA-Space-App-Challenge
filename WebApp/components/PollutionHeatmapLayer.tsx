@@ -39,41 +39,48 @@ declare global {
 // Predefined gradients for different pollutants
 const POLLUTANT_GRADIENTS: Record<PollutantType, { [key: string]: string }> = {
     pm25: {
-        0.0: "#00ff00", // Green - Good
-        0.2: "#ffff00", // Yellow - Moderate
-        0.4: "#ff8000", // Orange - Unhealthy for Sensitive
-        0.6: "#ff0000", // Red - Unhealthy
-        0.8: "#8000ff", // Purple - Very Unhealthy
-        1.0: "#800000", // Maroon - Hazardous
+        0.0: "#00ff00", // Bright Green - Good
+        0.15: "#80ff00", // Lime Green
+        0.3: "#ffff00", // Bright Yellow - Moderate
+        0.45: "#ff8000", // Bright Orange - Unhealthy for Sensitive
+        0.6: "#ff0000", // Bright Red - Unhealthy
+        0.75: "#ff00ff", // Magenta - Very Unhealthy
+        0.9: "#8000ff", // Purple
+        1.0: "#4a0080", // Dark Purple - Hazardous
     },
     pm10: {
-        0.0: "#00ff00",
-        0.25: "#ffff00",
-        0.5: "#ff8000",
-        0.75: "#ff0000",
-        1.0: "#8000ff",
+        0.0: "#00ff00", // Bright Green
+        0.2: "#80ff00", // Lime Green
+        0.4: "#ffff00", // Bright Yellow
+        0.6: "#ff8000", // Bright Orange
+        0.8: "#ff0000", // Bright Red
+        1.0: "#8000ff", // Purple
     },
     o3: {
-        0.0: "#00ff80", // Light green
-        0.3: "#ffff00", // Yellow
-        0.6: "#ff8000", // Orange
-        0.8: "#ff0000", // Red
+        0.0: "#00ff80", // Bright Light Green
+        0.25: "#80ff00", // Lime Green
+        0.5: "#ffff00", // Bright Yellow
+        0.7: "#ff8000", // Bright Orange
+        0.85: "#ff0000", // Bright Red
         1.0: "#8000ff", // Purple
     },
     no2: {
-        0.0: "#0080ff", // Light blue
-        0.3: "#00ff00", // Green
-        0.5: "#ffff00", // Yellow
-        0.7: "#ff8000", // Orange
-        1.0: "#ff0000", // Red
+        0.0: "#00ffff", // Bright Cyan
+        0.25: "#00ff00", // Bright Green
+        0.5: "#ffff00", // Bright Yellow
+        0.7: "#ff8000", // Bright Orange
+        0.85: "#ff0000", // Bright Red
+        1.0: "#8000ff", // Purple
     },
     aqi: {
-        0.0: "#00e400", // Good - Green
-        0.2: "#ffff00", // Moderate - Yellow
-        0.4: "#ff7e00", // Unhealthy for Sensitive - Orange
-        0.6: "#ff0000", // Unhealthy - Red
-        0.8: "#8f3f97", // Very Unhealthy - Purple
-        1.0: "#7e0023", // Hazardous - Maroon
+        0.0: "#00ff00", // Bright Green - Good
+        0.15: "#80ff00", // Lime Green
+        0.3: "#ffff00", // Bright Yellow - Moderate
+        0.45: "#ff8000", // Bright Orange - Unhealthy for Sensitive
+        0.6: "#ff0000", // Bright Red - Unhealthy
+        0.75: "#ff00ff", // Magenta - Very Unhealthy
+        0.9: "#8000ff", // Purple
+        1.0: "#4a0080", // Dark Purple - Hazardous
     },
 };
 
@@ -89,10 +96,10 @@ const POLLUTANT_MAX_VALUES: Record<PollutantType, number> = {
 const PollutionHeatmapLayer = ({
     points,
     pollutantType,
-    radius = 30,
+    radius = 60,
     maxZoom = 15,
-    blur = 20,
-    max = 1.0,
+    blur = 15,
+    max = 1.2,
     customGradient,
 }: PollutionHeatmapLayerProps) => {
     const map = useMap();
