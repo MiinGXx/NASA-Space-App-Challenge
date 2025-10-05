@@ -6,6 +6,7 @@ import { HealthGuidance } from "@/components/health-guidance";
 import { Header } from "@/components/header";
 import { LocationSearch } from "@/components/location-search";
 import PollutionMap from "@/components/pollution-map";
+import { ForecastPanel } from "@/components/forecast-panel";
 import {
     PushNotification,
     useNotifications,
@@ -157,22 +158,19 @@ export default function HomePage() {
                                 Interactive Map
                             </TabsTrigger>
                             <TabsTrigger
-                                value="tempo"
+                                value="pollution"
                                 className={`flex items-center gap-2 transition-colors duration-200 ${
-                                    activeMapTab === "tempo"
+                                    activeMapTab === "pollution"
                                         ? "bg-white/70 border-white/50 dark:bg-white/10 border-white/50 text-foreground rounded-lg shadow"
                                         : ""
                                 }`}
-                                onClick={() => setActiveMapTab("tempo")}
+                                onClick={() => setActiveMapTab("pollution")}
                             >
-                                TEMPO NO2 Map
+                                Pollution Heatmap
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="interactive" className="mt-4">
-                            <InteractiveMap location={currentLocation} />
-                        </TabsContent>
-                        <TabsContent value="tempo" className="mt-4">
-                            <TempoMap date={currentDate} />
+                            <PollutionMap location={currentLocation} />
                         </TabsContent>
                         <TabsContent value="pollution" className="mt-4">
                             <PollutionMap location={currentLocation} />
@@ -182,6 +180,11 @@ export default function HomePage() {
                     {/* Forecast Panel - Full width */}
                     <div className="w-full">
                         <ForecastPanel location={currentLocation} />
+                    </div>
+
+                    {/* Health Guidance - Full width on mobile */}
+                    <div className="lg:hidden w-full">
+                        <HealthGuidance location={currentLocation} />
                     </div>
 
                     {/* Notification Demo Buttons - Bottom of page */}
