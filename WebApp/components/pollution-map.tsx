@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
@@ -16,6 +16,25 @@ const TileLayer = dynamic(() => import("react-leaflet").then(mod => mod.TileLaye
 const Marker = dynamic(() => import("react-leaflet").then(mod => mod.Marker), { ssr: false });
 const CircleMarker = dynamic(() => import("react-leaflet").then(mod => mod.CircleMarker), { ssr: false });
 const Popup = dynamic(() => import("react-leaflet").then(mod => mod.Popup), { ssr: false });
+
+// Component to handle map view changes when location is searched
+const MapViewController = dynamic(() => 
+    import("react-leaflet").then(mod => {
+        const { useMap } = mod;
+        return function MapViewComponent({ center, zoom }: { center: [number, number] | null, zoom?: number }) {
+            const map = useMap();
+            
+            useEffect(() => {
+                if (center && map) {
+                    map.setView(center, zoom || 10, { animate: true, duration: 1 });
+                }
+            }, [center, zoom, map]);
+            
+            return null;
+        };
+    }), 
+    { ssr: false }
+);
 
 // Dynamically import PollutionHeatmapLayer to avoid SSR issues
 const PollutionHeatmapLayer = dynamic(() => import("./PollutionHeatmapLayer"), {
@@ -78,6 +97,8 @@ export default function PollutionMap({ location }: PollutionMapProps) {
     const [pollutionData, setPollutionData] = useState<PollutionPoint[]>([]);
     const [selectedPollutant, setSelectedPollutant] = useState<PollutantType>("aqi");
     const [mapCenter, setMapCenter] = useState<[number, number]>([39.8283, -98.5795]); // US center
+    const [searchedLocation, setSearchedLocation] = useState<{lat: number, lng: number, name: string} | null>(null);
+    const [viewCenter, setViewCenter] = useState<[number, number] | null>(null);
 
     // Fix Leaflet icon issues on client side only
     useEffect(() => {
@@ -102,23 +123,44 @@ export default function PollutionMap({ location }: PollutionMapProps) {
         }
     }, []);
 
-    // Update map center when location changes
+    // Update map center and add marker when location changes
     useEffect(() => {
-        if (location) {
-            // For demo purposes, we'll use some predefined locations
-            // In a real app, you'd geocode the location
-            const locationCoords: Record<string, [number, number]> = {
-                "Los Angeles": [34.0522, -118.2437],
-                "New York": [40.7128, -74.0060],
-                "Chicago": [41.8781, -87.6298],
-                "Houston": [29.7604, -95.3698],
-                "Phoenix": [33.4484, -112.0740],
-                "San Francisco": [37.7749, -122.4194],
-            };
+        const geocodeLocation = async () => {
+            if (location) {
+                try {
+                    // Use Open-Meteo geocoding API
+                    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+                        location
+                    )}&count=1&language=en&format=json`;
+                    const geoRes = await fetch(geoUrl);
+                    
+                    if (geoRes.ok) {
+                        const geo = await geoRes.json();
+                        const first = geo.results && geo.results[0];
+                        if (first) {
+                            const coords: [number, number] = [first.latitude, first.longitude];
+                            setMapCenter(coords);
+                            setSearchedLocation({
+                                lat: first.latitude,
+                                lng: first.longitude,
+                                name: first.name || location
+                            });
+                            setViewCenter(coords); // This will trigger the map view change
+                            console.log("📍 Geocoded location:", first.name, coords);
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.error("Geocoding error:", error);
+                }
+            }
+            
+            // Clear searched location marker if no location or geocoding failed
+            setSearchedLocation(null);
+            setViewCenter(null);
+        };
 
-            const coords = locationCoords[location] || [39.8283, -98.5795];
-            setMapCenter(coords);
-        }
+        geocodeLocation();
     }, [location]);
 
     // Fetch pollution data
@@ -303,6 +345,9 @@ export default function PollutionMap({ location }: PollutionMapProps) {
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
 
+                        {/* Map view controller for location search */}
+                        <MapViewController center={viewCenter} zoom={10} />
+
                         {/* Render pollution heatmap layer if data is available */}
                         {pollutionData.length > 0 && (
                             <PollutionHeatmapLayer
@@ -356,6 +401,31 @@ export default function PollutionMap({ location }: PollutionMapProps) {
                                     return null;
                                 }
                             })}
+
+                        {/* Searched Location Marker */}
+                        {searchedLocation && (
+                            <CircleMarker
+                                center={[searchedLocation.lat, searchedLocation.lng]}
+                                radius={8}
+                                fillColor="#FF6B35"
+                                color="white"
+                                weight={2}
+                                opacity={1}
+                                fillOpacity={0.9}
+                            >
+                                <Popup>
+                                    <div className="p-2">
+                                        <h4 className="font-semibold">📍 {searchedLocation.name}</h4>
+                                        <p className="text-sm text-muted-foreground">
+                                            Lat: {searchedLocation.lat.toFixed(4)}, Lng: {searchedLocation.lng.toFixed(4)}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Searched location
+                                        </p>
+                                    </div>
+                                </Popup>
+                            </CircleMarker>
+                        )}
 
                         {/* Map Legend */}
                         <MapLegend

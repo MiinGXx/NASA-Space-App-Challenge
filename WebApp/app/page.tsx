@@ -13,7 +13,7 @@ import {
 } from "@/components/push-notification";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Bell, AlertTriangle, CheckCircle, Info, Sparkles } from "lucide-react";
 import {
     Dialog,
@@ -30,7 +30,6 @@ import { MoodReactiveWrapper } from "@/components/mood-reactive-wrapper";
 import { useAQIMood } from "@/components/aqi-mood-provider";
 
 export default function HomePage() {
-    const [activeMapTab, setActiveMapTab] = useState<string>("interactive");
     const [currentLocation, setCurrentLocation] = useState<string>("");
     const [currentDate, setCurrentDate] = useState<string>(
         new Date().toISOString().split("T")[0]
@@ -143,39 +142,10 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Map Tabs - Interactive Map, TEMPO NO2 Map, and Pollution Heatmap */}
-                    <Tabs defaultValue="interactive" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 border border-white/50 rounded-lg">
-                            <TabsTrigger
-                                value="interactive"
-                                className={`flex items-center gap-2 transition-colors duration-200 ${
-                                    activeMapTab === "interactive"
-                                        ? "bg-white/70 border-white/50 dark:bg-white/10 border-white/50 text-foreground rounded-lg shadow"
-                                        : ""
-                                }`}
-                                onClick={() => setActiveMapTab("interactive")}
-                            >
-                                Interactive Map
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="pollution"
-                                className={`flex items-center gap-2 transition-colors duration-200 ${
-                                    activeMapTab === "pollution"
-                                        ? "bg-white/70 border-white/50 dark:bg-white/10 border-white/50 text-foreground rounded-lg shadow"
-                                        : ""
-                                }`}
-                                onClick={() => setActiveMapTab("pollution")}
-                            >
-                                Pollution Heatmap
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="interactive" className="mt-4">
-                            <PollutionMap location={currentLocation} />
-                        </TabsContent>
-                        <TabsContent value="pollution" className="mt-4">
-                            <PollutionMap location={currentLocation} />
-                        </TabsContent>
-                    </Tabs>
+                    {/* Pollution Map - Full width */}
+                    <div className="w-full">
+                        <PollutionMap location={currentLocation} />
+                    </div>
 
                     {/* Forecast Panel - Full width */}
                     <div className="w-full">
