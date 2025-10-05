@@ -292,7 +292,6 @@ export default function PollutionMap({ location }: PollutionMapProps) {
                         {/* Add simple dot markers for major data points */}
                         {pollutionData
                             .filter(point => point.location)
-                            .slice(0, 10) // Limit to prevent clutter
                             .map((point, index) => {
                                 try {
                                     // Calculate color based on pollution value

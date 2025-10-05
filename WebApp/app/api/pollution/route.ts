@@ -1,32 +1,96 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// US State Capitals with coordinates
+const US_STATE_CAPITALS = [
+    { name: "Montgomery, Alabama", lat: 32.361538, lng: -86.279118 },
+    { name: "Juneau, Alaska", lat: 58.301935, lng: -134.419740 },
+    { name: "Phoenix, Arizona", lat: 33.448457, lng: -112.073844 },
+    { name: "Little Rock, Arkansas", lat: 34.736009, lng: -92.331122 },
+    { name: "Sacramento, California", lat: 38.576668, lng: -121.493629 },
+    { name: "Denver, Colorado", lat: 39.739236, lng: -104.990251 },
+    { name: "Hartford, Connecticut", lat: 41.767, lng: -72.677 },
+    { name: "Dover, Delaware", lat: 39.161921, lng: -75.526755 },
+    { name: "Tallahassee, Florida", lat: 30.4518, lng: -84.27277 },
+    { name: "Atlanta, Georgia", lat: 33.76, lng: -84.39 },
+    { name: "Honolulu, Hawaii", lat: 21.30895, lng: -157.826182 },
+    { name: "Boise, Idaho", lat: 43.613739, lng: -116.237651 },
+    { name: "Springfield, Illinois", lat: 39.78325, lng: -89.650373 },
+    { name: "Indianapolis, Indiana", lat: 39.790942, lng: -86.147685 },
+    { name: "Des Moines, Iowa", lat: 41.590939, lng: -93.620866 },
+    { name: "Topeka, Kansas", lat: 39.04, lng: -95.69 },
+    { name: "Frankfort, Kentucky", lat: 38.194, lng: -84.86311 },
+    { name: "Baton Rouge, Louisiana", lat: 30.45809, lng: -91.140229 },
+    { name: "Augusta, Maine", lat: 44.323535, lng: -69.765261 },
+    { name: "Annapolis, Maryland", lat: 38.972945, lng: -76.501157 },
+    { name: "Boston, Massachusetts", lat: 42.2352, lng: -71.0275 },
+    { name: "Lansing, Michigan", lat: 42.354558, lng: -84.955255 },
+    { name: "Saint Paul, Minnesota", lat: 44.95, lng: -93.094 },
+    { name: "Jackson, Mississippi", lat: 32.320, lng: -90.207 },
+    { name: "Jefferson City, Missouri", lat: 38.572954, lng: -92.189283 },
+    { name: "Helena, Montana", lat: 46.595805, lng: -112.027031 },
+    { name: "Lincoln, Nebraska", lat: 40.809868, lng: -96.675345 },
+    { name: "Carson City, Nevada", lat: 39.161921, lng: -119.767409 },
+    { name: "Concord, New Hampshire", lat: 43.220093, lng: -71.549896 },
+    { name: "Trenton, New Jersey", lat: 40.221741, lng: -74.756138 },
+    { name: "Santa Fe, New Mexico", lat: 35.667231, lng: -105.964575 },
+    { name: "Albany, New York", lat: 42.659829, lng: -73.781339 },
+    { name: "Raleigh, North Carolina", lat: 35.771, lng: -78.638 },
+    { name: "Bismarck, North Dakota", lat: 46.813343, lng: -100.779004 },
+    { name: "Columbus, Ohio", lat: 39.961176, lng: -82.998794 },
+    { name: "Oklahoma City, Oklahoma", lat: 35.482309, lng: -97.534994 },
+    { name: "Salem, Oregon", lat: 44.931109, lng: -123.029159 },
+    { name: "Harrisburg, Pennsylvania", lat: 40.269789, lng: -76.875613 },
+    { name: "Providence, Rhode Island", lat: 41.82355, lng: -71.422132 },
+    { name: "Columbia, South Carolina", lat: 34.000, lng: -81.035 },
+    { name: "Pierre, South Dakota", lat: 44.367966, lng: -100.336378 },
+    { name: "Nashville, Tennessee", lat: 36.165, lng: -86.784 },
+    { name: "Austin, Texas", lat: 30.266667, lng: -97.75 },
+    { name: "Salt Lake City, Utah", lat: 40.777477, lng: -111.888237 },
+    { name: "Montpelier, Vermont", lat: 44.26639, lng: -72.58133 },
+    { name: "Richmond, Virginia", lat: 37.54, lng: -77.46 },
+    { name: "Olympia, Washington", lat: 47.042418, lng: -122.893077 },
+    { name: "Charleston, West Virginia", lat: 38.349497, lng: -81.633294 },
+    { name: "Madison, Wisconsin", lat: 43.074722, lng: -89.384444 },
+    { name: "Cheyenne, Wyoming", lat: 41.145548, lng: -104.802042 }
+];
+
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const pollutant = searchParams.get("pollutant") || "aqi";
         const location = searchParams.get("location");
+        const debug = searchParams.get("debug") === "true";
 
-        // For demonstration purposes, we'll generate mock data
-        // In a real application, you would fetch data from air quality APIs like:
-        // - OpenWeatherMap Air Pollution API
-        // - IQAir API
-        // - PurpleAir API
-        // - EPA AirNow API
+        console.log(`🌍 Pollution API called: pollutant=${pollutant}, location=${location || 'all'}, debug=${debug}`);
+        console.log(`📊 Total state capitals available: ${US_STATE_CAPITALS.length}`);
 
-        const pollutionData = await generatePollutionData(pollutant, location);
+        // Fetch real pollution data from Open Meteo for US state capitals
+        const pollutionData = await fetchOpenMeteoPollutionData(pollutant, location);
 
-        return NextResponse.json({
+        const response = {
             success: true,
             pollutionData,
             metadata: {
                 pollutant,
                 location,
                 timestamp: new Date().toISOString(),
-                source: "mock_data", // In real app: "openweathermap", "iqair", etc.
+                source: "open_meteo_air_quality",
+                totalRequested: location ? 
+                    US_STATE_CAPITALS.filter(capital => 
+                        capital.name.toLowerCase().includes(location.toLowerCase())
+                    ).length : US_STATE_CAPITALS.length,
+                totalReceived: pollutionData.length
             },
-        });
+        };
+
+        if (debug) {
+            console.log(`📈 Debug info:`, response.metadata);
+            console.log(`📍 Sample data points:`, pollutionData.slice(0, 3));
+        }
+
+        return NextResponse.json(response);
     } catch (error) {
-        console.error("Error fetching pollution data:", error);
+        console.error("❌ Error fetching pollution data:", error);
         return NextResponse.json(
             {
                 success: false,
@@ -38,190 +102,201 @@ export async function GET(request: NextRequest) {
     }
 }
 
-async function generatePollutionData(pollutant: string, location?: string | null) {
-    // Define base values for different pollutants and cities
-    const cities = [
-        // Major US cities with typical pollution levels
-        { name: "Los Angeles", lat: 34.0522, lng: -118.2437, 
-          pollution: { pm25: 25, pm10: 40, o3: 120, no2: 45, aqi: 85 } },
-        { name: "New York", lat: 40.7128, lng: -74.0060, 
-          pollution: { pm25: 18, pm10: 30, o3: 95, no2: 38, aqi: 68 } },
-        { name: "Chicago", lat: 41.8781, lng: -87.6298, 
-          pollution: { pm25: 15, pm10: 25, o3: 85, no2: 32, aqi: 58 } },
-        { name: "Houston", lat: 29.7604, lng: -95.3698, 
-          pollution: { pm25: 22, pm10: 35, o3: 110, no2: 42, aqi: 78 } },
-        { name: "Phoenix", lat: 33.4484, lng: -112.0740, 
-          pollution: { pm25: 20, pm10: 45, o3: 105, no2: 28, aqi: 72 } },
-        { name: "Philadelphia", lat: 39.9526, lng: -75.1652, 
-          pollution: { pm25: 16, pm10: 28, o3: 88, no2: 35, aqi: 62 } },
-        { name: "San Antonio", lat: 29.4241, lng: -98.4936, 
-          pollution: { pm25: 14, pm10: 22, o3: 92, no2: 25, aqi: 55 } },
-        { name: "San Diego", lat: 32.7157, lng: -117.1611, 
-          pollution: { pm25: 12, pm10: 18, o3: 78, no2: 22, aqi: 48 } },
-        { name: "Dallas", lat: 32.7767, lng: -96.7970, 
-          pollution: { pm25: 19, pm10: 32, o3: 98, no2: 36, aqi: 65 } },
-        { name: "San Jose", lat: 37.3382, lng: -121.8863, 
-          pollution: { pm25: 13, pm10: 20, o3: 82, no2: 24, aqi: 52 } },
-        { name: "Austin", lat: 30.2672, lng: -97.7431, 
-          pollution: { pm25: 16, pm10: 26, o3: 89, no2: 29, aqi: 58 } },
-        { name: "Jacksonville", lat: 30.3322, lng: -81.6557, 
-          pollution: { pm25: 11, pm10: 17, o3: 75, no2: 20, aqi: 45 } },
-        { name: "San Francisco", lat: 37.7749, lng: -122.4194, 
-          pollution: { pm25: 10, pm10: 15, o3: 70, no2: 18, aqi: 42 } },
-        { name: "Columbus", lat: 39.9612, lng: -82.9988, 
-          pollution: { pm25: 14, pm10: 23, o3: 84, no2: 27, aqi: 54 } },
-        { name: "Fort Worth", lat: 32.7555, lng: -97.3308, 
-          pollution: { pm25: 18, pm10: 30, o3: 95, no2: 34, aqi: 63 } },
-        { name: "Charlotte", lat: 35.2271, lng: -80.8431, 
-          pollution: { pm25: 13, pm10: 21, o3: 81, no2: 26, aqi: 51 } },
-        { name: "Seattle", lat: 47.6062, lng: -122.3321, 
-          pollution: { pm25: 9, pm10: 14, o3: 68, no2: 16, aqi: 38 } },
-        { name: "Denver", lat: 39.7392, lng: -104.9903, 
-          pollution: { pm25: 12, pm10: 19, o3: 95, no2: 21, aqi: 49 } },
-        { name: "El Paso", lat: 31.7619, lng: -106.4850, 
-          pollution: { pm25: 17, pm10: 38, o3: 88, no2: 23, aqi: 61 } },
-        { name: "Detroit", lat: 42.3314, lng: -83.0458, 
-          pollution: { pm25: 16, pm10: 27, o3: 86, no2: 31, aqi: 59 } },
-    ];
-
-    const pollutionData = [];
-
-    // If a specific location is requested, focus on that area
-    if (location) {
-        const targetCity = cities.find(city => 
-            city.name.toLowerCase().includes(location.toLowerCase()) ||
-            location.toLowerCase().includes(city.name.toLowerCase())
-        );
-
-        if (targetCity) {
-            // Generate detailed data around the target city
-            for (let i = 0; i < 20; i++) {
-                const offsetLat = (Math.random() - 0.5) * 0.5; // ±0.25 degrees
-                const offsetLng = (Math.random() - 0.5) * 0.5;
-                const variance = 0.7 + Math.random() * 0.6; // 0.7-1.3 multiplier
-                
-                pollutionData.push({
-                    lat: targetCity.lat + offsetLat,
-                    lng: targetCity.lng + offsetLng,
-                    value: targetCity.pollution[pollutant as keyof typeof targetCity.pollution] * variance,
-                    pollutantType: pollutant,
-                    location: i === 0 ? targetCity.name : undefined,
-                    timestamp: new Date().toISOString(),
-                });
-            }
-        }
-    }
-
-    // Always include data for major cities
-    cities.forEach(city => {
-        // Add main city point
-        pollutionData.push({
-            lat: city.lat,
-            lng: city.lng,
-            value: city.pollution[pollutant as keyof typeof city.pollution],
-            pollutantType: pollutant,
-            location: city.name,
-            timestamp: new Date().toISOString(),
-        });
-
-        // Add surrounding points for better heatmap visualization
-        for (let i = 0; i < 8; i++) {
-            const angle = (i / 8) * 2 * Math.PI;
-            const distance = 0.1 + Math.random() * 0.3; // 0.1-0.4 degrees
-            const offsetLat = Math.sin(angle) * distance;
-            const offsetLng = Math.cos(angle) * distance;
-            const variance = 0.6 + Math.random() * 0.8; // 0.6-1.4 multiplier
-            
-            pollutionData.push({
-                lat: city.lat + offsetLat,
-                lng: city.lng + offsetLng,
-                value: city.pollution[pollutant as keyof typeof city.pollution] * variance,
-                pollutantType: pollutant,
-                timestamp: new Date().toISOString(),
-            });
-        }
-    });
-
-    // Add some random points across the US for broader coverage
-    for (let i = 0; i < 30; i++) {
-        const lat = 25 + Math.random() * 20; // Roughly US latitude range
-        const lng = -125 + Math.random() * 55; // Roughly US longitude range
+async function fetchOpenMeteoPollutionData(pollutant: string, location?: string | null) {
+    // Helper function to calculate AQI from PM values (same logic as weather API)
+    function aqiFromPM25(c: number): number | null {
+        if (c === null || c === undefined || isNaN(c)) return null;
+        const pm25Breakpoints: Array<[number, number, number, number]> = [
+            [0.0, 12.0, 0, 50],
+            [12.1, 35.4, 51, 100],
+            [35.5, 55.4, 101, 150],
+            [55.5, 150.4, 151, 200],
+            [150.5, 250.4, 201, 300],
+            [250.5, 350.4, 301, 400],
+            [350.5, 500.4, 401, 500],
+        ];
         
-        // Base pollution values for rural/random areas
-        const basePollution = {
-            pm25: 5 + Math.random() * 15,
-            pm10: 8 + Math.random() * 20,
-            o3: 60 + Math.random() * 40,
-            no2: 10 + Math.random() * 20,
-            aqi: 30 + Math.random() * 40,
-        };
-
-        pollutionData.push({
-            lat,
-            lng,
-            value: basePollution[pollutant as keyof typeof basePollution],
-            pollutantType: pollutant,
-            timestamp: new Date().toISOString(),
-        });
-    }
-
-    return pollutionData;
-}
-
-// For future implementation with real APIs:
-/*
-async function fetchRealPollutionData(pollutant: string, location?: string | null) {
-    // Example implementation for OpenWeatherMap Air Pollution API
-    const API_KEY = process.env.OPENWEATHER_API_KEY;
-    
-    if (!API_KEY) {
-        throw new Error("OpenWeatherMap API key not configured");
-    }
-
-    // If location is provided, geocode it first
-    let coordinates = [];
-    if (location) {
-        const geocodeResponse = await fetch(
-            `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(location)}&limit=1&appid=${API_KEY}`
-        );
-        const geocodeData = await geocodeResponse.json();
-        if (geocodeData.length > 0) {
-            coordinates.push({ lat: geocodeData[0].lat, lon: geocodeData[0].lon });
-        }
-    }
-
-    // Add major US cities
-    const majorCities = [
-        { lat: 40.7128, lon: -74.0060 }, // New York
-        { lat: 34.0522, lon: -118.2437 }, // Los Angeles
-        { lat: 41.8781, lon: -87.6298 }, // Chicago
-        // ... more cities
-    ];
-
-    const pollutionData = [];
-    
-    for (const coord of [...coordinates, ...majorCities]) {
-        try {
-            const response = await fetch(
-                `https://api.openweathermap.org/data/2.5/air_pollution?lat=${coord.lat}&lon=${coord.lon}&appid=${API_KEY}`
-            );
-            const data = await response.json();
-            
-            if (data.list && data.list.length > 0) {
-                const pollution = data.list[0];
-                pollutionData.push({
-                    lat: coord.lat,
-                    lng: coord.lon,
-                    value: pollution.components[pollutant] || pollution.main.aqi,
-                    pollutantType: pollutant,
-                    timestamp: new Date(pollution.dt * 1000).toISOString(),
-                });
+        if (c > 500.4) return 500;
+        
+        for (const [Clow, Chigh, Ilow, Ihigh] of pm25Breakpoints) {
+            if (c >= Clow && c <= Chigh) {
+                return Math.round(((Ihigh - Ilow) / (Chigh - Clow)) * (c - Clow) + Ilow);
             }
-        } catch (error) {
-            console.error(`Error fetching pollution data for ${coord.lat}, ${coord.lon}:`, error);
+        }
+        return null;
+    }
+
+    function aqiFromPM10(c: number): number | null {
+        if (c === null || c === undefined || isNaN(c)) return null;
+        const pm10Breakpoints: Array<[number, number, number, number]> = [
+            [0, 54, 0, 50],
+            [55, 154, 51, 100],
+            [155, 254, 101, 150],
+            [255, 354, 151, 200],
+            [355, 424, 201, 300],
+            [425, 504, 301, 400],
+            [505, 604, 401, 500],
+        ];
+        
+        if (c > 604) return 500;
+        
+        for (const [Clow, Chigh, Ilow, Ihigh] of pm10Breakpoints) {
+            if (c >= Clow && c <= Chigh) {
+                return Math.round(((Ihigh - Ilow) / (Chigh - Clow)) * (c - Clow) + Ilow);
+            }
+        }
+        return null;
+    }
+
+    // Filter state capitals by location if specified
+    let capitalsList = US_STATE_CAPITALS;
+    if (location) {
+        capitalsList = US_STATE_CAPITALS.filter(capital => 
+            capital.name.toLowerCase().includes(location.toLowerCase())
+        );
+        if (capitalsList.length === 0) {
+            capitalsList = US_STATE_CAPITALS; // Fall back to all capitals if no match
         }
     }
 
-    return pollutionData;
+    // Fetch air quality data for each state capital
+    console.log(`Fetching pollution data for ${capitalsList.length} capitals...`);
+    
+    // Add delays between batches to avoid rate limiting
+    const batchSize = 10;
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    
+    const results: any[] = [];
+    
+    for (let i = 0; i < capitalsList.length; i += batchSize) {
+        const batch = capitalsList.slice(i, i + batchSize);
+        
+        const batchPromises = batch.map(async (capital) => {
+            try {
+                const params = new URLSearchParams({
+                    latitude: String(capital.lat),
+                    longitude: String(capital.lng),
+                    current: ["us_aqi", "pm10", "pm2_5", "nitrogen_dioxide", "ozone"].join(","),
+                    timezone: "auto",
+                });
+
+                const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?${params.toString()}`;
+                
+                // Create a timeout promise
+                const timeoutPromise = new Promise<never>((_, reject) => {
+                    setTimeout(() => reject(new Error('Request timeout')), 8000);
+                });
+                
+                const fetchPromise = fetch(aqUrl, {
+                    headers: {
+                        'User-Agent': 'NASA-Space-App-Challenge/1.0'
+                    }
+                });
+                
+                const response = await Promise.race([fetchPromise, timeoutPromise]);
+                
+                if (!response.ok) {
+                    if (response.status === 429) {
+                        console.warn(`⏳ Rate limited for ${capital.name}, will retry in next batch`);
+                    } else {
+                        console.warn(`❌ Failed to fetch data for ${capital.name}: ${response.status} ${response.statusText}`);
+                    }
+                    return null;
+                }
+                
+                const data = await response.json();
+                
+                if (data.current) {
+                    const currentData = data.current;
+                    
+                    // Extract pollutant values
+                    const pm25 = currentData.pm2_5 || null;
+                    const pm10 = currentData.pm10 || null;
+                    const no2 = currentData.nitrogen_dioxide || null;
+                    const o3 = currentData.ozone || null;
+                    let aqi = currentData.us_aqi || null;
+                    
+                    // Calculate AQI if not provided
+                    if (!aqi && (pm25 || pm10)) {
+                        const aqi25 = pm25 ? aqiFromPM25(pm25) : null;
+                        const aqi10 = pm10 ? aqiFromPM10(pm10) : null;
+                        aqi = Math.max(aqi25 || 0, aqi10 || 0) || null;
+                    }
+                    
+                    // Get the value for the requested pollutant
+                    let value = 0;
+                    switch (pollutant) {
+                        case "pm25":
+                            value = pm25 || 0;
+                            break;
+                        case "pm10":
+                            value = pm10 || 0;
+                            break;
+                        case "no2":
+                            value = no2 || 0;
+                            break;
+                        case "o3":
+                            value = o3 || 0;
+                            break;
+                        case "aqi":
+                        default:
+                            value = aqi || 0;
+                            break;
+                    }
+                    
+                    console.log(`✓ Successfully fetched data for ${capital.name}: ${pollutant}=${value}`);
+                    
+                    return {
+                        lat: capital.lat,
+                        lng: capital.lng,
+                        value: value,
+                        pollutantType: pollutant,
+                        location: capital.name,
+                        timestamp: new Date().toISOString(),
+                        rawData: {
+                            pm25,
+                            pm10,
+                            no2,
+                            o3,
+                            aqi
+                        }
+                    };
+                } else {
+                    console.warn(`⚠️ No current data available for ${capital.name}`);
+                    return null;
+                }
+            } catch (error) {
+                console.error(`❌ Error fetching data for ${capital.name}:`, error);
+                return null;
+            }
+        });
+
+        // Wait for this batch to complete
+        const batchResults = await Promise.allSettled(batchPromises);
+        
+        // Extract successful results
+        const successfulBatchResults = batchResults
+            .filter((result): result is PromiseFulfilledResult<any> => 
+                result.status === 'fulfilled' && result.value !== null
+            )
+            .map(result => result.value);
+        
+        results.push(...successfulBatchResults);
+        
+        // Add delay between batches to avoid rate limiting (except for last batch)
+        if (i + batchSize < capitalsList.length) {
+            console.log(`⏸️ Waiting 1 second before next batch...`);
+            await delay(1000);
+        }
+    }
+    
+    console.log(`✅ Successfully fetched data for ${results.length}/${capitalsList.length} capitals`);
+    
+    // Log any failures
+    const failedCount = capitalsList.length - results.length;
+    if (failedCount > 0) {
+        console.warn(`⚠️ Failed to fetch data for ${failedCount} capitals (likely due to rate limiting)`);
+    }
+
+    return results;
 }
-*/
