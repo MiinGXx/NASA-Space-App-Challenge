@@ -25,23 +25,24 @@ A comprehensive AI-powered real-time air quality monitoring application with an 
 
 ```
 NASA-Space-App-Challenge/
-├── WebApp/                    # Next.js Frontend Application
-│   ├── app/                   # App Router (Next.js 13+)
-│   │   ├── api/               # API Routes
-│   │   │   ├── chat/          # AI Chatbot API
-│   │   │   ├── pollution/     # Air Quality Data API
-│   │   │   └── weather/       # Weather Data API
-│   │   ├── globals.css        # Global styles with mood theming
-│   │   ├── layout.tsx         # Root layout with providers
-│   │   └── page.tsx           # Main application page
+WebApp/                    # Next.js Frontend Application
+├── app/                   # App Router (Next.js 13+)
+│   ├── api/               # API Routes
+│   │   ├── chat/          # AI Chatbot API
+│   │   ├── pollution/     # Air Quality Data API
+│   │   └── weather/       # Weather Data API
+│   ├── globals.css        # Global styles with mood theming
+│   ├── layout.tsx         # Root layout with providers
+│   └── page.tsx           # Main application page
 │   ├── components/            # Reusable React Components
-│   │   ├── ui/                # shadcn/ui components
-│   │   ├── aqi-status.tsx     # Air quality status display
-│   │   ├── pollution-map.tsx  # Interactive pollution heatmap
-│   │   ├── mood-reactive-wrapper.tsx  # Mood UI wrapper
-│   │   ├── aqi-mood-provider.tsx      # Mood state management
-│   │   └── ...               # Other feature components
-│   └── ...                   # Configuration files
+│   ├── ui/                # shadcn/ui components
+│   ├── aqi-status.tsx     # Air quality status display
+│   ├── pollution-map.tsx  # Interactive pollution heatmap
+│   ├── mood-reactive-wrapper.tsx  # Mood UI wrapper
+│   ├── aqi-mood-provider.tsx      # Mood state management
+│   └── ...               # Other feature components
+└── ...                   # Configuration files
+```
 
 ## 🛠️ Tech Stack
 
@@ -96,7 +97,9 @@ npm run dev
 ```
 
 5. **Access the application**
-Open [http://localhost:3000](http://localhost:3000) in your browser
+```
+Open "http://localhost:3000" in your browser
+```
 
 ## 📱 Features Deep Dive
 
