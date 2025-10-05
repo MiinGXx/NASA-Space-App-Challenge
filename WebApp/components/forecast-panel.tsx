@@ -146,7 +146,7 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
                 const isoDay = (iso: string) => iso.slice(0, 10);
 
                 const newWeekly: ForecastData[] = dTimes
-                    .slice(0, 7)
+                    .slice(0, 5) // Reduced from 7 to 5 days to avoid empty data
                     .map((d: string, i: number) => {
                         // find hourly indices that match this day in air quality times
                         const dayKey = d;
@@ -324,7 +324,7 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
 
                     <TabsContent value="weekly" className="space-y-6">
                         {/* Weekly Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-7 gap-3 md:gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4">
                             {weeklyForecast.map((day, index) => {
                                 const isNoForecast = day.aqi === 0;
                                 return (
