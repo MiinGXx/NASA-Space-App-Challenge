@@ -115,6 +115,22 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    /* AQI Mood Variables - Dynamic values set by AQIMoodProvider */
+    --aqi-mood-bg: from-cyan-50 via-sky-100 to-blue-50;
+    --aqi-mood-gradient: radial-gradient(
+        ellipse at top,
+        rgba(125, 211, 252, 0.4),
+        transparent 60%
+    );
+    --aqi-mood-card-bg: rgba(255, 255, 255, 0.8);
+    --aqi-mood-card-border: rgba(14, 165, 233, 0.2);
+    --aqi-mood-text-primary: rgb(12, 74, 110);
+    --aqi-mood-text-secondary: rgb(7, 89, 133);
+    --aqi-mood-accent: rgb(14, 165, 233);
+    --aqi-mood-overlay: rgba(186, 230, 253, 0.15);
+    --aqi-mood-shadow: rgba(14, 165, 233, 0.2);
+    --aqi-mood-level: pristine;
 }
 
 @layer base {
@@ -148,6 +164,15 @@ html.theme-transition *:before,
 html.theme-transition *:after {
     transition: all 0.5s ease-in-out !important;
     transition-delay: 0 !important;
+}
+
+/* AQI Mood transition styles - smooth transitions for mood changes */
+html.aqi-mood-transition,
+html.aqi-mood-transition body,
+html.aqi-mood-transition .mood-reactive {
+    transition: background 1.2s ease-in-out, background-color 1.2s ease-in-out,
+        color 0.8s ease-in-out, border-color 0.8s ease-in-out,
+        box-shadow 0.8s ease-in-out !important;
 }
 
 /* Background image transition for theme changes */
@@ -229,8 +254,242 @@ body {
 
 /* Custom pollution marker styles */
 .pollution-marker {
-    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(51,136,255,1) 100%) !important;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(51, 136, 255, 1) 100%
+    ) !important;
     border-radius: 50% !important;
     border: 2px solid white !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
+
+/* ===========================
+   AQI MOOD-REACTIVE STYLES
+   =========================== */
+
+/* Mood-reactive background with gradient overlay */
+.mood-reactive-bg {
+    position: relative;
+    transition: all 1.2s ease-in-out;
+}
+
+.mood-reactive-bg::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--aqi-mood-bg));
+    opacity: 0.15;
+    z-index: -2;
+    pointer-events: none;
+    transition: opacity 1.2s ease-in-out, background 1.2s ease-in-out;
+}
+
+.mood-reactive-bg::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--aqi-mood-gradient);
+    opacity: 1;
+    z-index: -1;
+    pointer-events: none;
+    transition: background 1.2s ease-in-out, opacity 1.2s ease-in-out;
+}
+
+/* Atmospheric overlay effect based on pollution level */
+.mood-atmosphere {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--aqi-mood-overlay);
+    pointer-events: none;
+    z-index: 1;
+    backdrop-filter: blur(0px);
+    transition: background 1.2s ease-in-out, backdrop-filter 1.2s ease-in-out;
+}
+
+/* Fog effect for higher AQI levels */
+[data-aqi-mood="hazy"] .mood-atmosphere,
+[data-aqi-mood="polluted"] .mood-atmosphere {
+    backdrop-filter: blur(0.5px);
+}
+
+[data-aqi-mood="toxic"] .mood-atmosphere,
+[data-aqi-mood="hazardous"] .mood-atmosphere {
+    backdrop-filter: blur(1px);
+}
+
+/* Mood-reactive cards */
+.mood-card {
+    background: var(--aqi-mood-card-bg) !important;
+    border-color: var(--aqi-mood-card-border) !important;
+    box-shadow: 0 4px 6px -1px var(--aqi-mood-shadow),
+        0 2px 4px -1px var(--aqi-mood-shadow);
+    backdrop-filter: blur(12px);
+    transition: background 0.8s ease-in-out, border-color 0.8s ease-in-out,
+        box-shadow 0.8s ease-in-out;
+}
+
+.mood-card:hover {
+    box-shadow: 0 10px 15px -3px var(--aqi-mood-shadow),
+        0 4px 6px -2px var(--aqi-mood-shadow);
+}
+
+/* Mood-reactive text colors */
+.mood-text-primary {
+    color: var(--aqi-mood-text-primary);
+    transition: color 0.8s ease-in-out;
+}
+
+.mood-text-secondary {
+    color: var(--aqi-mood-text-secondary);
+    transition: color 0.8s ease-in-out;
+}
+
+.mood-accent {
+    color: var(--aqi-mood-accent);
+    transition: color 0.8s ease-in-out;
+}
+
+/* Mood-reactive borders and accents */
+.mood-border {
+    border-color: var(--aqi-mood-card-border);
+    transition: border-color 0.8s ease-in-out;
+}
+
+.mood-accent-border {
+    border-color: var(--aqi-mood-accent);
+    transition: border-color 0.8s ease-in-out;
+}
+
+/* Animated particles for pristine/good air quality */
+@keyframes float-particle {
+    0%,
+    100% {
+        transform: translateY(0) translateX(0);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translateY(-20px) translateX(10px);
+        opacity: 0.6;
+    }
+}
+
+[data-aqi-mood="pristine"] .mood-particles,
+[data-aqi-mood="fresh"] .mood-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.mood-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--aqi-mood-accent);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: float-particle 8s infinite ease-in-out;
+}
+
+/* Pulsating glow effect for hazardous conditions */
+@keyframes hazard-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 10px var(--aqi-mood-accent),
+            0 0 20px var(--aqi-mood-accent);
+    }
+    50% {
+        box-shadow: 0 0 20px var(--aqi-mood-accent),
+            0 0 40px var(--aqi-mood-accent);
+    }
+}
+
+[data-aqi-mood="hazardous"] .mood-card,
+[data-aqi-mood="toxic"] .mood-card {
+    animation: hazard-pulse 3s infinite ease-in-out;
+}
+
+/* Mood status indicator */
+.mood-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background: var(--aqi-mood-card-bg);
+    border: 1px solid var(--aqi-mood-card-border);
+    color: var(--aqi-mood-text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.8s ease-in-out;
+}
+
+.mood-indicator::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--aqi-mood-accent);
+    box-shadow: 0 0 8px var(--aqi-mood-accent);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .mood-reactive-bg::before,
+    .mood-reactive-bg::after {
+        opacity: 0.8;
+    }
+
+    .mood-atmosphere {
+        backdrop-filter: blur(0px);
+    }
+
+    [data-aqi-mood="toxic"] .mood-atmosphere,
+    [data-aqi-mood="hazardous"] .mood-atmosphere {
+        backdrop-filter: blur(0.5px);
+    }
+}
+
+/* AQI Card Background Transitions */
+.aqi-card-background {
+    background-blend-mode: overlay;
+    transition: background-image 1s ease-in-out;
+}
+
+.aqi-card-background::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    filter: blur(2px);
+    z-index: -1;
+}
+
+/* To replace placeholder gradients with custom images later, use:
+   background-image: url('/path/to/image.jpg');
+   
+   For example:
+   - Good (0-50): url('/aqi-backgrounds/clear-sky.jpg')
+   - Moderate (51-100): url('/aqi-backgrounds/cloudy.jpg')
+   - Unhealthy for Sensitive (101-150): url('/aqi-backgrounds/hazy.jpg')
+   - Unhealthy (151-200): url('/aqi-backgrounds/smog.jpg')
+   - Very Unhealthy (201-300): url('/aqi-backgrounds/dense-smog.jpg')
+   - Hazardous (300+): url('/aqi-backgrounds/hazardous.jpg')
+*/

@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/dialog";
 import { AQIHigherLowerGame } from "@/components/aqi-higher-lower-game";
 import { useAQIAudio } from "@/hooks/use-aqi-audio";
+import { MoodReactiveWrapper } from "@/components/mood-reactive-wrapper";
+import { useAQIMood } from "@/components/aqi-mood-provider";
 
 export default function HomePage() {
     const [activeMapTab, setActiveMapTab] = useState<string>("interactive");
@@ -37,7 +39,16 @@ export default function HomePage() {
     );
 
     // AQI Audio management
-    const { isMuted, toggleMute, updateAQI } = useAQIAudio();
+    const { isMuted, toggleMute, updateAQI: updateAudioAQI } = useAQIAudio();
+
+    // AQI Mood management
+    const { updateAQI: updateMoodAQI } = useAQIMood();
+
+    // Combined AQI update handler
+    const handleAQIUpdate = (aqi: number) => {
+        updateAudioAQI(aqi);
+        updateMoodAQI(aqi);
+    };
 
     // Get browser location and set city on initial load
     useEffect(() => {
@@ -111,123 +122,125 @@ export default function HomePage() {
     };
 
     return (
-        <div
-            className="min-h-screen bg-background/90 backdrop-blur-sm"
-            onContextMenu={(e) => e.preventDefault()}
-        >
-            <Header isMuted={isMuted} onToggleMute={toggleMute} />
-            <LocationSearch onSearch={handleSearch} />
-            <main className="container mx-auto px-4 py-3 space-y-8">
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                    {/* Current AQI Status - Takes full width on mobile, 2 columns on desktop */}
-                    <div className="lg:col-span-3">
-                        <AQIStatus
-                            location={currentLocation}
-                            onAQIUpdate={updateAQI}
-                        />
+        <MoodReactiveWrapper>
+            <div
+                className="min-h-screen bg-background/90 backdrop-blur-sm"
+                onContextMenu={(e) => e.preventDefault()}
+            >
+                <Header isMuted={isMuted} onToggleMute={toggleMute} />
+                <LocationSearch onSearch={handleSearch} />
+                <main className="container mx-auto px-4 py-3 space-y-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                        {/* Current AQI Status - Takes full width on mobile, 2 columns on desktop */}
+                        <div className="lg:col-span-3">
+                            <AQIStatus
+                                location={currentLocation}
+                                onAQIUpdate={handleAQIUpdate}
+                            />
+                        </div>
+
+                        {/* Health Guidance - Sidebar on desktop */}
+                        <div className="lg:col-span-2">
+                            <HealthGuidance location={currentLocation} />
+                        </div>
                     </div>
 
-                    {/* Health Guidance - Sidebar on desktop */}
-                    <div className="lg:col-span-2">
-                        <HealthGuidance location={currentLocation} />
+                    {/* Map Tabs - Interactive Map, TEMPO NO2 Map, and Pollution Heatmap */}
+                    <Tabs defaultValue="interactive" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 border border-white/50 rounded-lg">
+                            <TabsTrigger
+                                value="interactive"
+                                className={`flex items-center gap-2 transition-colors duration-200 ${
+                                    activeMapTab === "interactive"
+                                        ? "bg-white/70 border-white/50 dark:bg-white/10 border-white/50 text-foreground rounded-lg shadow"
+                                        : ""
+                                }`}
+                                onClick={() => setActiveMapTab("interactive")}
+                            >
+                                Interactive Map
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="tempo"
+                                className={`flex items-center gap-2 transition-colors duration-200 ${
+                                    activeMapTab === "tempo"
+                                        ? "bg-white/70 border-white/50 dark:bg-white/10 border-white/50 text-foreground rounded-lg shadow"
+                                        : ""
+                                }`}
+                                onClick={() => setActiveMapTab("tempo")}
+                            >
+                                TEMPO NO2 Map
+                            </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="interactive" className="mt-4">
+                            <InteractiveMap location={currentLocation} />
+                        </TabsContent>
+                        <TabsContent value="tempo" className="mt-4">
+                            <TempoMap date={currentDate} />
+                        </TabsContent>
+                        <TabsContent value="pollution" className="mt-4">
+                            <PollutionMap location={currentLocation} />
+                        </TabsContent>
+                    </Tabs>
+
+                    {/* Forecast Panel - Full width */}
+                    <div className="w-full">
+                        <ForecastPanel location={currentLocation} />
                     </div>
-                </div>
 
-                {/* Map Tabs - Interactive Map, TEMPO NO2 Map, and Pollution Heatmap */}
-                <Tabs defaultValue="interactive" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 border border-white/50 rounded-lg">
-                        <TabsTrigger
-                            value="interactive"
-                            className={`flex items-center gap-2 transition-colors duration-200 ${
-                                activeMapTab === "interactive"
-                                    ? "bg-white/70 border-white/50 dark:bg-white/10 border-white/50 text-foreground rounded-lg shadow"
-                                    : ""
-                            }`}
-                            onClick={() => setActiveMapTab("interactive")}
-                        >
-                            Interactive Map
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="tempo"
-                            className={`flex items-center gap-2 transition-colors duration-200 ${
-                                activeMapTab === "tempo"
-                                    ? "bg-white/70 border-white/50 dark:bg-white/10 border-white/50 text-foreground rounded-lg shadow"
-                                    : ""
-                            }`}
-                            onClick={() => setActiveMapTab("tempo")}
-                        >
-                            TEMPO NO2 Map
-                        </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="interactive" className="mt-4">
-                        <InteractiveMap location={currentLocation} />
-                    </TabsContent>
-                    <TabsContent value="tempo" className="mt-4">
-                        <TempoMap date={currentDate} />
-                    </TabsContent>
-                    <TabsContent value="pollution" className="mt-4">
-                        <PollutionMap location={currentLocation} />
-                    </TabsContent>
-                </Tabs>
-
-                {/* Forecast Panel - Full width */}
-                <div className="w-full">
-                    <ForecastPanel location={currentLocation} />
-                </div>
-
-                {/* Notification Demo Buttons - Bottom of page */}
-                <div className="w-full py-8 border-t border-border">
-                    <div className="text-center mb-4">
-                        <h3 className="text-lg font-semibold mb-2">
-                            Push Notification Demo
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                            Click any button below to test the push notification
-                            component
-                        </p>
+                    {/* Notification Demo Buttons - Bottom of page */}
+                    <div className="w-full py-8 border-t border-border">
+                        <div className="text-center mb-4">
+                            <h3 className="text-lg font-semibold mb-2">
+                                Push Notification Demo
+                            </h3>
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Click any button below to test the push
+                                notification component
+                            </p>
+                        </div>
+                        <div className="flex flex-wrap justify-center gap-4">
+                            <Button
+                                onClick={() => triggerNotification("info")}
+                                variant="outline"
+                                className="flex items-center gap-2"
+                            >
+                                <Info className="h-4 w-4" />
+                                Info Notification
+                            </Button>
+                            <Button
+                                onClick={() => triggerNotification("success")}
+                                variant="outline"
+                                className="flex items-center gap-2"
+                            >
+                                <CheckCircle className="h-4 w-4" />
+                                Success Notification
+                            </Button>
+                            <Button
+                                onClick={() => triggerNotification("warning")}
+                                variant="outline"
+                                className="flex items-center gap-2"
+                            >
+                                <AlertTriangle className="h-4 w-4" />
+                                Warning Notification
+                            </Button>
+                            <Button
+                                onClick={() => triggerNotification("error")}
+                                variant="outline"
+                                className="flex items-center gap-2"
+                            >
+                                <AlertTriangle className="h-4 w-4" />
+                                Error Notification
+                            </Button>
+                        </div>
                     </div>
-                    <div className="flex flex-wrap justify-center gap-4">
-                        <Button
-                            onClick={() => triggerNotification("info")}
-                            variant="outline"
-                            className="flex items-center gap-2"
-                        >
-                            <Info className="h-4 w-4" />
-                            Info Notification
-                        </Button>
-                        <Button
-                            onClick={() => triggerNotification("success")}
-                            variant="outline"
-                            className="flex items-center gap-2"
-                        >
-                            <CheckCircle className="h-4 w-4" />
-                            Success Notification
-                        </Button>
-                        <Button
-                            onClick={() => triggerNotification("warning")}
-                            variant="outline"
-                            className="flex items-center gap-2"
-                        >
-                            <AlertTriangle className="h-4 w-4" />
-                            Warning Notification
-                        </Button>
-                        <Button
-                            onClick={() => triggerNotification("error")}
-                            variant="outline"
-                            className="flex items-center gap-2"
-                        >
-                            <AlertTriangle className="h-4 w-4" />
-                            Error Notification
-                        </Button>
-                    </div>
-                </div>
-            </main>
+                </main>
 
-            {/* Push Notification Component */}
-            <PushNotification
-                notification={notification}
-                onClose={hideNotification}
-            />
-        </div>
+                {/* Push Notification Component */}
+                <PushNotification
+                    notification={notification}
+                    onClose={hideNotification}
+                />
+            </div>
+        </MoodReactiveWrapper>
     );
 }
