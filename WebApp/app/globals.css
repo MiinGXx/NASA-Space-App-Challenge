@@ -513,7 +513,8 @@ body {
     transition: background-image 1s ease-in-out;
 }
 
-.aqi-card-background::before {
+/* Removed blur effect for crisp background images */
+/* .aqi-card-background::before {
     content: "";
     position: absolute;
     top: 0;
@@ -523,7 +524,7 @@ body {
     background: inherit;
     filter: blur(2px);
     z-index: -1;
-}
+} */
 
 /* To replace placeholder gradients with custom images later, use:
    background-image: url('/path/to/image.jpg');
