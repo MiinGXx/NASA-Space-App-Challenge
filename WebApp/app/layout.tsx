@@ -32,9 +32,10 @@ export default function RootLayout({
                         defaultTheme="system"
                         enableSystem
                     >
-                        {children}
-                        <FloatingChatbot />
-                        <AQIMoodProvider>{children}</AQIMoodProvider>
+                        <AQIMoodProvider>
+                            {children}
+                            <FloatingChatbot />
+                        </AQIMoodProvider>
                     </ThemeProvider>
                 </Suspense>
                 <Analytics />
