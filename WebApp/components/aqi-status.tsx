@@ -426,7 +426,7 @@ export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
             <div className={loading ? "blur-sm pointer-events-none" : ""}>
                 {aqiData ? (
                     <Card
-                        className="w-full h-[520px] relative overflow-hidden !bg-transparent"
+                        className="w-full h-[520px] relative overflow-hidden !bg-transparent !backdrop-blur-none"
                         style={{
                             backgroundImage: getAQIBackground(aqiData.value),
                             backgroundSize: "cover",
@@ -434,8 +434,8 @@ export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
                             backgroundRepeat: "no-repeat",
                         }}
                     >
-                        {/* Darker semi-transparent overlay for better text readability */}
-                        <div className="absolute inset-0 bg-black/10"></div>
+                        {/* Semi-transparent overlay for better text readability - only in dark mode */}
+                        <div className="absolute inset-0 bg-transparent dark:bg-black/5"></div>
 
                         {/* Content wrapper with relative positioning */}
                         <div className="relative z-10 h-full flex flex-col">
@@ -479,7 +479,7 @@ export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
 
                                 {/* Pollutant Breakdown */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div className="text-center p-3 rounded-lg bg-white/20 border border-white/50 shadow-lg">
+                                    <div className="text-center p-3 rounded-lg backdrop-blur-sm bg-white/5 dark:bg-black/30 border border-white/50 dark:border-white/30 shadow-lg">
                                         <div className="text-lg font-semibold mood-text-primary">
                                             {aqiData.pollutants.pm25}
                                         </div>
@@ -487,7 +487,7 @@ export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
                                             PM2.5 μg/m³
                                         </div>
                                     </div>
-                                    <div className="text-center p-3 rounded-lg bg-white/20 border border-white/50 shadow-lg">
+                                    <div className="text-center p-3 rounded-lg backdrop-blur-sm bg-white/5 dark:bg-black/30 border border-white/50 dark:border-white/30 shadow-lg">
                                         <div className="text-lg font-semibold mood-text-primary">
                                             {aqiData.pollutants.pm10}
                                         </div>
@@ -495,7 +495,7 @@ export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
                                             PM10 μg/m³
                                         </div>
                                     </div>
-                                    <div className="text-center p-3 rounded-lg bg-white/20 border border-white/50 shadow-lg">
+                                    <div className="text-center p-3 rounded-lg backdrop-blur-sm bg-white/5 dark:bg-black/30 border border-white/50 dark:border-white/30 shadow-lg">
                                         <div className="text-lg font-semibold mood-text-primary">
                                             {aqiData.pollutants.o3}
                                         </div>
@@ -503,7 +503,7 @@ export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
                                             O₃ μg/m³
                                         </div>
                                     </div>
-                                    <div className="text-center p-3 rounded-lg bg-white/20 border border-white/50 shadow-lg">
+                                    <div className="text-center p-3 rounded-lg backdrop-blur-sm bg-white/5 dark:bg-black/30 border border-white/50 dark:border-white/30 shadow-lg">
                                         <div className="text-lg font-semibold mood-text-primary">
                                             {aqiData.pollutants.no2}
                                         </div>
