@@ -7,6 +7,7 @@ import { Skeleton } from "./ui/skeleton";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import PollutionLoading from "./pollution-loading";
 import type { PollutionPoint, PollutantType } from "./PollutionHeatmapLayer";
 
 // Dynamically import all Leaflet components to avoid SSR issues
@@ -72,6 +73,7 @@ const POLLUTANT_CONFIG: Record<PollutantType, {
 
 export default function PollutionMap({ location }: PollutionMapProps) {
     const [loading, setLoading] = useState(true);
+    const [loadingStage, setLoadingStage] = useState<"initial" | "fetching" | "processing" | "rendering">("initial");
     const [error, setError] = useState<string | null>(null);
     const [pollutionData, setPollutionData] = useState<PollutionPoint[]>([]);
     const [selectedPollutant, setSelectedPollutant] = useState<PollutantType>("aqi");
@@ -124,7 +126,12 @@ export default function PollutionMap({ location }: PollutionMapProps) {
         const fetchPollutionData = async () => {
             try {
                 setLoading(true);
+                setLoadingStage("initial");
                 setError(null);
+
+                // Stage 1: Connecting
+                await new Promise(resolve => setTimeout(resolve, 800));
+                setLoadingStage("fetching");
 
                 const apiUrl = `/api/pollution?pollutant=${selectedPollutant}${
                     location ? `&location=${encodeURIComponent(location)}` : ""
@@ -137,13 +144,24 @@ export default function PollutionMap({ location }: PollutionMapProps) {
                     );
                 }
 
+                // Stage 2: Processing data
+                setLoadingStage("processing");
+                await new Promise(resolve => setTimeout(resolve, 600));
+
                 const data = await response.json();
+                
+                // Stage 3: Rendering
+                setLoadingStage("rendering");
+                await new Promise(resolve => setTimeout(resolve, 400));
+                
                 setPollutionData(data.pollutionData || []);
             } catch (err) {
                 console.error("Error fetching pollution data:", err);
                 
                 // For now, generate some mock data for demonstration
                 console.log("Using mock data for demonstration");
+                setLoadingStage("processing");
+                await new Promise(resolve => setTimeout(resolve, 500));
                 generateMockData();
             } finally {
                 setLoading(false);
@@ -254,7 +272,10 @@ export default function PollutionMap({ location }: PollutionMapProps) {
             
             <CardContent className="p-0 h-[calc(100%-120px)]">
                 {loading ? (
-                    <Skeleton className="w-full h-full" />
+                    <PollutionLoading 
+                        stage={loadingStage}
+                        message={loadingStage === "fetching" ? "Downloading air quality data from 51 monitoring stations..." : undefined}
+                    />
                 ) : error ? (
                     <div className="flex items-center justify-center h-full">
                         <p className="text-red-500">{error}</p>
@@ -283,9 +304,9 @@ export default function PollutionMap({ location }: PollutionMapProps) {
                             <PollutionHeatmapLayer
                                 points={pollutionData}
                                 pollutantType={selectedPollutant}
-                                radius={35}
-                                blur={25}
-                                max={1.0}
+                                radius={60}
+                                blur={15}
+                                max={1.2}
                             />
                         )}
 
