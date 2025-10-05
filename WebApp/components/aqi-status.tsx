@@ -24,9 +24,10 @@ interface AQIData {
 
 interface AQIStatusProps {
     location?: string;
+    onAQIUpdate?: (aqi: number) => void;
 }
 
-export function AQIStatus({ location }: AQIStatusProps) {
+export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
     const [loading, setLoading] = useState(false);
     const [aqiData, setAqiData] = useState<AQIData | null>(null);
     const [city, setCity] = useState<string | undefined>(location);
@@ -147,6 +148,12 @@ export function AQIStatus({ location }: AQIStatusProps) {
                                     ) / 10,
                             },
                         });
+
+                        // Update audio based on AQI
+                        if (onAQIUpdate) {
+                            onAQIUpdate(finalAqi);
+                        }
+
                         if (lastNotifiedCity.current !== targetCity) {
                             showNotification({
                                 title: "Air quality data loaded",
@@ -220,6 +227,12 @@ export function AQIStatus({ location }: AQIStatusProps) {
                                 ) / 10,
                         },
                     });
+
+                    // Update audio based on AQI
+                    if (onAQIUpdate) {
+                        onAQIUpdate(finalAqi);
+                    }
+
                     if (lastNotifiedCity.current !== targetCity) {
                         showNotification({
                             title: "Air quality data loaded",
@@ -251,6 +264,12 @@ export function AQIStatus({ location }: AQIStatusProps) {
                     lastUpdated: new Date().toLocaleTimeString(),
                     pollutants: { pm25, pm10, o3, no2 },
                 });
+
+                // Update audio based on AQI
+                if (onAQIUpdate) {
+                    onAQIUpdate(aqiVal);
+                }
+
                 if (lastNotifiedCity.current !== targetCity) {
                     showNotification({
                         title: "Air quality data loaded",

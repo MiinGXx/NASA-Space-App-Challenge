@@ -27,6 +27,7 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import { AQIHigherLowerGame } from "@/components/aqi-higher-lower-game";
+import { useAQIAudio } from "@/hooks/use-aqi-audio";
 
 export default function HomePage() {
     const [activeMapTab, setActiveMapTab] = useState<string>("interactive");
@@ -34,6 +35,9 @@ export default function HomePage() {
     const [currentDate, setCurrentDate] = useState<string>(
         new Date().toISOString().split("T")[0]
     );
+
+    // AQI Audio management
+    const { isMuted, toggleMute, updateAQI } = useAQIAudio();
 
     // Get browser location and set city on initial load
     useEffect(() => {
@@ -111,13 +115,16 @@ export default function HomePage() {
             className="min-h-screen bg-background/90 backdrop-blur-sm"
             onContextMenu={(e) => e.preventDefault()}
         >
-            <Header />
+            <Header isMuted={isMuted} onToggleMute={toggleMute} />
             <LocationSearch onSearch={handleSearch} />
             <main className="container mx-auto px-4 py-3 space-y-8">
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
                     {/* Current AQI Status - Takes full width on mobile, 2 columns on desktop */}
                     <div className="lg:col-span-3">
-                        <AQIStatus location={currentLocation} />
+                        <AQIStatus
+                            location={currentLocation}
+                            onAQIUpdate={updateAQI}
+                        />
                     </div>
 
                     {/* Health Guidance - Sidebar on desktop */}
