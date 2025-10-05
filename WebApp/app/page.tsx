@@ -2,12 +2,9 @@
 "use client";
 
 import { AQIStatus } from "@/components/aqi-status";
-import { InteractiveMap } from "@/components/interactive-map";
-import { ForecastPanel } from "@/components/forecast-panel";
 import { HealthGuidance } from "@/components/health-guidance";
 import { Header } from "@/components/header";
 import { LocationSearch } from "@/components/location-search";
-import TempoMap from "@/components/tempo-map";
 import PollutionMap from "@/components/pollution-map";
 import {
     PushNotification,
