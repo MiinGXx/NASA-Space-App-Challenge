@@ -54,6 +54,14 @@ const US_STATE_CAPITALS = [
     { name: "Cheyenne, Wyoming", lat: 41.145548, lng: -104.802042 }
 ];
 
+// International cities including Kuching
+const INTERNATIONAL_CITIES = [
+    { name: "Kuching, Malaysia", lat: 1.5535, lng: 110.3593 }
+];
+
+// Combined list of all cities
+const ALL_CITIES = [...US_STATE_CAPITALS, ...INTERNATIONAL_CITIES];
+
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
@@ -62,7 +70,7 @@ export async function GET(request: NextRequest) {
         const debug = searchParams.get("debug") === "true";
 
         console.log(`🌍 Pollution API called: pollutant=${pollutant}, location=${location || 'all'}, debug=${debug}`);
-        console.log(`📊 Total state capitals available: ${US_STATE_CAPITALS.length}`);
+        console.log(`📊 Total cities available: ${ALL_CITIES.length}`);
 
         // Fetch real pollution data from Open Meteo for US state capitals
         const pollutionData = await fetchOpenMeteoPollutionData(pollutant, location);
@@ -76,9 +84,9 @@ export async function GET(request: NextRequest) {
                 timestamp: new Date().toISOString(),
                 source: "open_meteo_air_quality",
                 totalRequested: location ? 
-                    US_STATE_CAPITALS.filter(capital => 
-                        capital.name.toLowerCase().includes(location.toLowerCase())
-                    ).length : US_STATE_CAPITALS.length,
+                    ALL_CITIES.filter(city => 
+                        city.name.toLowerCase().includes(location.toLowerCase())
+                    ).length : ALL_CITIES.length,
                 totalReceived: pollutionData.length
             },
         };
@@ -148,19 +156,19 @@ async function fetchOpenMeteoPollutionData(pollutant: string, location?: string 
         return null;
     }
 
-    // Filter state capitals by location if specified
-    let capitalsList = US_STATE_CAPITALS;
+    // Filter cities by location if specified
+    let citiesList = ALL_CITIES;
     if (location) {
-        capitalsList = US_STATE_CAPITALS.filter(capital => 
-            capital.name.toLowerCase().includes(location.toLowerCase())
+        citiesList = ALL_CITIES.filter(city => 
+            city.name.toLowerCase().includes(location.toLowerCase())
         );
-        if (capitalsList.length === 0) {
-            capitalsList = US_STATE_CAPITALS; // Fall back to all capitals if no match
+        if (citiesList.length === 0) {
+            citiesList = ALL_CITIES; // Fall back to all cities if no match
         }
     }
 
     // Fetch air quality data for each state capital
-    console.log(`Fetching pollution data for ${capitalsList.length} capitals...`);
+    console.log(`Fetching pollution data for ${citiesList.length} cities...`);
     
     // Add delays between batches to avoid rate limiting
     const batchSize = 10;
@@ -168,14 +176,14 @@ async function fetchOpenMeteoPollutionData(pollutant: string, location?: string 
     
     const results: any[] = [];
     
-    for (let i = 0; i < capitalsList.length; i += batchSize) {
-        const batch = capitalsList.slice(i, i + batchSize);
+    for (let i = 0; i < citiesList.length; i += batchSize) {
+        const batch = citiesList.slice(i, i + batchSize);
         
-        const batchPromises = batch.map(async (capital) => {
+        const batchPromises = batch.map(async (city: { name: string; lat: number; lng: number }) => {
             try {
                 const params = new URLSearchParams({
-                    latitude: String(capital.lat),
-                    longitude: String(capital.lng),
+                    latitude: String(city.lat),
+                    longitude: String(city.lng),
                     current: ["us_aqi", "pm10", "pm2_5", "nitrogen_dioxide", "ozone"].join(","),
                     timezone: "auto",
                 });
@@ -197,9 +205,9 @@ async function fetchOpenMeteoPollutionData(pollutant: string, location?: string 
                 
                 if (!response.ok) {
                     if (response.status === 429) {
-                        console.warn(`⏳ Rate limited for ${capital.name}, will retry in next batch`);
+                        console.warn(`⏳ Rate limited for ${city.name}, will retry in next batch`);
                     } else {
-                        console.warn(`❌ Failed to fetch data for ${capital.name}: ${response.status} ${response.statusText}`);
+                        console.warn(`❌ Failed to fetch data for ${city.name}: ${response.status} ${response.statusText}`);
                     }
                     return null;
                 }
@@ -244,14 +252,14 @@ async function fetchOpenMeteoPollutionData(pollutant: string, location?: string 
                             break;
                     }
                     
-                    console.log(`✓ Successfully fetched data for ${capital.name}: ${pollutant}=${value}`);
+                    console.log(`✓ Successfully fetched data for ${city.name}: ${pollutant}=${value}`);
                     
                     return {
-                        lat: capital.lat,
-                        lng: capital.lng,
+                        lat: city.lat,
+                        lng: city.lng,
                         value: value,
                         pollutantType: pollutant,
-                        location: capital.name,
+                        location: city.name,
                         timestamp: new Date().toISOString(),
                         rawData: {
                             pm25,
@@ -262,11 +270,11 @@ async function fetchOpenMeteoPollutionData(pollutant: string, location?: string 
                         }
                     };
                 } else {
-                    console.warn(`⚠️ No current data available for ${capital.name}`);
+                    console.warn(`⚠️ No current data available for ${city.name}`);
                     return null;
                 }
             } catch (error) {
-                console.error(`❌ Error fetching data for ${capital.name}:`, error);
+                console.error(`❌ Error fetching data for ${city.name}:`, error);
                 return null;
             }
         });
@@ -284,18 +292,18 @@ async function fetchOpenMeteoPollutionData(pollutant: string, location?: string 
         results.push(...successfulBatchResults);
         
         // Add delay between batches to avoid rate limiting (except for last batch)
-        if (i + batchSize < capitalsList.length) {
+        if (i + batchSize < citiesList.length) {
             console.log(`⏸️ Waiting 1 second before next batch...`);
             await delay(1000);
         }
     }
     
-    console.log(`✅ Successfully fetched data for ${results.length}/${capitalsList.length} capitals`);
+    console.log(`✅ Successfully fetched data for ${results.length}/${citiesList.length} cities`);
     
     // Log any failures
-    const failedCount = capitalsList.length - results.length;
+    const failedCount = citiesList.length - results.length;
     if (failedCount > 0) {
-        console.warn(`⚠️ Failed to fetch data for ${failedCount} capitals (likely due to rate limiting)`);
+        console.warn(`⚠️ Failed to fetch data for ${failedCount} cities (likely due to rate limiting)`);
     }
 
     return results;
