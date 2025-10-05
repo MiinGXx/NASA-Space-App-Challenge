@@ -2,12 +2,9 @@
 "use client";
 
 import { AQIStatus } from "@/components/aqi-status";
-import { InteractiveMap } from "@/components/interactive-map";
-import { ForecastPanel } from "@/components/forecast-panel";
 import { HealthGuidance } from "@/components/health-guidance";
 import { Header } from "@/components/header";
 import { LocationSearch } from "@/components/location-search";
-import TempoMap from "@/components/tempo-map";
 import PollutionMap from "@/components/pollution-map";
 import {
     PushNotification,
@@ -15,14 +12,10 @@ import {
 } from "@/components/push-notification";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bell, AlertTriangle, CheckCircle, Info } from "lucide-react";
 
 export default function HomePage() {
     const [currentLocation, setCurrentLocation] = useState<string>("");
-    const [currentDate, setCurrentDate] = useState<string>(
-        new Date().toISOString().split("T")[0]
-    );
     const { notification, showNotification, hideNotification } =
         useNotifications();
 
@@ -81,29 +74,9 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Map Tabs - Interactive Map, TEMPO NO2 Map, and Pollution Heatmap */}
-                <Tabs defaultValue="interactive" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="interactive">
-                            Interactive Map
-                        </TabsTrigger>
-                        <TabsTrigger value="tempo">TEMPO NO2 Map</TabsTrigger>
-                        <TabsTrigger value="pollution">Pollution Heatmap</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="interactive" className="mt-4">
-                        <InteractiveMap location={currentLocation} />
-                    </TabsContent>
-                    <TabsContent value="tempo" className="mt-4">
-                        <TempoMap date={currentDate} />
-                    </TabsContent>
-                    <TabsContent value="pollution" className="mt-4">
-                        <PollutionMap location={currentLocation} />
-                    </TabsContent>
-                </Tabs>
-
-                {/* Forecast Panel - Full width */}
+                {/* Pollution Map - Now the main feature */}
                 <div className="w-full">
-                    <ForecastPanel location={currentLocation} />
+                    <PollutionMap location={currentLocation} />
                 </div>
 
                 {/* Notification Demo Buttons - Bottom of page */}

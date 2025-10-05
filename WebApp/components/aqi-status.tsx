@@ -60,186 +60,46 @@ export function AQIStatus({ location }: AQIStatusProps) {
             (async () => {
                 try {
                     const res = await fetch(
-                        `/api/weather?q=${encodeURIComponent(location)}`
+                        `/api/pollution?pollutant=aqi&location=${encodeURIComponent(location)}`
                     );
                     if (!res.ok) throw new Error("Failed to fetch");
                     const json = await res.json();
 
-                    const air = json.air_quality || null;
-                    // Prefer provider's US AQI when present (air.current.us_aqi or air.hourly.us_aqi)
-                    if (air) {
-                        // check direct current us_aqi
-                        const currentUsAqi = air.current?.us_aqi ?? null;
-                        const usHourly = air.hourly?.us_aqi ?? null;
-                        if (
-                            currentUsAqi != null ||
-                            (Array.isArray(usHourly) && usHourly.length)
-                        ) {
-                            let aqiVal: number | null = null;
-                            let pm25 = 0;
-                            let pm10 = 0;
+                    // Our pollution API returns a simple array of cities with pollution data
+                    if (json && json.length > 0) {
+                        // Find the matching city (case-insensitive)
+                        const cityData = json.find((city: any) => 
+                            city.name.toLowerCase().includes(location.toLowerCase()) || 
+                            location.toLowerCase().includes(city.name.toLowerCase())
+                        );
 
-                            if (currentUsAqi != null) {
-                                aqiVal = Number(currentUsAqi);
-                            }
-
-                            let nearestIdx = 0;
-                            if (
-                                Array.isArray(usHourly) &&
-                                Array.isArray(air.hourly.time)
-                            ) {
-                                // find nearest index
-                                const times: string[] = air.hourly.time || [];
-                                const now = new Date();
-                                let minDiff = Infinity;
-                                for (let i = 0; i < times.length; i++) {
-                                    const t = new Date(times[i]).getTime();
-                                    const diff = Math.abs(t - now.getTime());
-                                    if (diff < minDiff) {
-                                        minDiff = diff;
-                                        nearestIdx = i;
-                                    }
-                                }
-                                pm25 =
-                                    Math.round(
-                                        (air.hourly.pm2_5?.[nearestIdx] || 0) *
-                                            10
-                                    ) / 10;
-                                pm10 =
-                                    Math.round(
-                                        (air.hourly.pm10?.[nearestIdx] || 0) *
-                                            10
-                                    ) / 10;
-                                if (aqiVal == null) {
-                                    const usVal =
-                                        air.hourly.us_aqi?.[nearestIdx] ?? null;
-                                    aqiVal =
-                                        usVal != null ? Number(usVal) : null;
-                                }
-                            }
-
-                            const finalAqi =
-                                aqiVal == null
-                                    ? 0
-                                    : Math.min(500, Number(aqiVal));
+                        if (cityData) {
+                            const aqiVal = cityData.aqi || 0;
+                            
                             setAqiData({
-                                value: finalAqi,
-                                level: getAQILevel(finalAqi),
-                                location: location,
+                                value: aqiVal,
+                                level: getAQILevel(aqiVal),
+                                location: cityData.name,
                                 lastUpdated: new Date().toLocaleTimeString(),
                                 pollutants: {
-                                    pm25,
-                                    pm10,
-                                    o3:
-                                        Math.round(
-                                            (air.hourly?.ozone?.[nearestIdx] ||
-                                                0) * 10
-                                        ) / 10,
-                                    no2:
-                                        Math.round(
-                                            (air.hourly?.nitrogen_dioxide?.[
-                                                nearestIdx
-                                            ] || 0) * 10
-                                        ) / 10,
+                                    pm25: cityData.pm25 || 0,
+                                    pm10: cityData.pm10 || 0,
+                                    o3: cityData.o3 || 0,
+                                    no2: cityData.no2 || 0,
                                 },
                             });
                             return;
                         }
                     }
 
-                    // If API provided computed AQI, use it directly
-                    if (
-                        air &&
-                        (air.aqi_current !== undefined ||
-                            (air.hourly && air.hourly.aqi))
-                    ) {
-                        let aqiVal = null;
-                        let pm25 = 0;
-                        let pm10 = 0;
-
-                        if (air.aqi_current !== undefined) {
-                            aqiVal = air.aqi_current;
-                        }
-
-                        let nearestIdx = 0;
-                        if (air.hourly && Array.isArray(air.hourly.time)) {
-                            const times: string[] = air.hourly.time || [];
-                            const now = new Date();
-                            let minDiff = Infinity;
-                            for (let i = 0; i < times.length; i++) {
-                                const t = new Date(times[i]).getTime();
-                                const diff = Math.abs(t - now.getTime());
-                                if (diff < minDiff) {
-                                    minDiff = diff;
-                                    nearestIdx = i;
-                                }
-                            }
-                            pm25 =
-                                Math.round(
-                                    (air.hourly.pm2_5?.[nearestIdx] || 0) * 10
-                                ) / 10;
-                            pm10 =
-                                Math.round(
-                                    (air.hourly.pm10?.[nearestIdx] || 0) * 10
-                                ) / 10;
-                            if (aqiVal == null && air.hourly.aqi) {
-                                aqiVal = air.hourly.aqi[nearestIdx] ?? null;
-                            }
-                        }
-
-                        const finalAqi =
-                            aqiVal == null ? 0 : Math.min(500, Number(aqiVal));
-                        setAqiData({
-                            value: finalAqi,
-                            level: getAQILevel(finalAqi),
-                            location: location,
-                            lastUpdated: new Date().toLocaleTimeString(),
-                            pollutants: {
-                                pm25,
-                                pm10,
-                                o3:
-                                    Math.round(
-                                        (air.hourly?.ozone?.[nearestIdx] || 0) *
-                                            10
-                                    ) / 10,
-                                no2:
-                                    Math.round(
-                                        (air.hourly?.nitrogen_dioxide?.[
-                                            nearestIdx
-                                        ] || 0) * 10
-                                    ) / 10,
-                            },
-                        });
-                        return;
-                    }
-
-                    // Fallback: previous heuristic if no air quality data available
-                    {
-                        const current = json.weather.current_weather || {};
-                        const temp = current.temperature || 0;
-                        const wind = current.windspeed || 0;
-                        const pm25 =
-                            Math.round(Math.max(1, temp * 0.3) * 10) / 10;
-                        const pm10 =
-                            Math.round(Math.max(1, temp * 0.6) * 10) / 10;
-                        const o3 =
-                            Math.round(Math.max(1, temp * 1.0) * 10) / 10;
-                        const no2 =
-                            Math.round(Math.max(1, wind * 0.5) * 10) / 10;
-
-                        const aqiVal = Math.min(
-                            500,
-                            Math.round(pm25 * 3 + pm10 * 0.5)
-                        );
-                        setAqiData({
-                            value: aqiVal,
-                            level: getAQILevel(aqiVal),
-                            location: location,
-                            lastUpdated: new Date().toLocaleTimeString(),
-                            pollutants: { pm25, pm10, o3, no2 },
-                        });
-                        return;
-                    }
+                    // Fallback if no data found
+                    setAqiData({
+                        value: 0,
+                        level: "No Data",
+                        location: location,
+                        lastUpdated: new Date().toLocaleTimeString(),
+                        pollutants: { pm25: 0, pm10: 0, o3: 0, no2: 0 },
+                    });
                 } catch (e) {
                     console.error(e);
                 }
