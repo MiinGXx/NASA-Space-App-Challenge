@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FloatingChatbot } from "@/components/floating-chatbot";
+import { AQIMoodProvider } from "@/components/aqi-mood-provider";
 import { Suspense } from "react";
 import "./globals.css";
 
@@ -33,6 +34,7 @@ export default function RootLayout({
                     >
                         {children}
                         <FloatingChatbot />
+                        <AQIMoodProvider>{children}</AQIMoodProvider>
                     </ThemeProvider>
                 </Suspense>
                 <Analytics />
