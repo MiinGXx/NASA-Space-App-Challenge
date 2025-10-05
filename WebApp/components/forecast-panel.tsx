@@ -117,6 +117,21 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
                 // helper to get YYYY-MM-DD from ISO string
                 const isoDay = (iso: string) => iso.slice(0, 10);
 
+                // Find the current/nearest hour index for today's AQI
+                let currentHourIdx = 0;
+                if (aqTimes && aqTimes.length) {
+                    const now = new Date();
+                    let minDiff = Infinity;
+                    for (let i = 0; i < aqTimes.length; i++) {
+                        const t = new Date(aqTimes[i]).getTime();
+                        const diff = Math.abs(t - now.getTime());
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            currentHourIdx = i;
+                        }
+                    }
+                }
+
                 const newWeekly: ForecastData[] = dTimes
                     .slice(0, 7)
                     .map((d: string, i: number) => {
@@ -127,9 +142,22 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
                             .filter(({ at }) => isoDay(at) === dayKey)
                             .map(({ idx }) => idx);
 
-                        // compute daily AQI as the max AQI value for the day (or 0)
+                        // For today (i === 0), use current/nearest hour AQI to match aqi-status
+                        // For other days, use the max AQI value for the day
                         let dayAqi = 0;
-                        if (indices.length && aqAqi && aqAqi.length) {
+                        if (
+                            i === 0 &&
+                            aqAqi &&
+                            aqAqi.length &&
+                            currentHourIdx < aqAqi.length
+                        ) {
+                            // Today: use current hour's AQI
+                            dayAqi =
+                                aqAqi[currentHourIdx] != null
+                                    ? Number(aqAqi[currentHourIdx])
+                                    : 0;
+                        } else if (indices.length && aqAqi && aqAqi.length) {
+                            // Other days: use max AQI for the day
                             const vals = indices.map((ii) =>
                                 aqAqi[ii] != null ? Number(aqAqi[ii]) : 0
                             );
