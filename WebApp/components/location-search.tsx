@@ -97,7 +97,7 @@ export function LocationSearch({ onSearch }: SearchBarProps) {
                 <form onSubmit={handleSubmit} className="flex gap-2 w-full">
                     <div
                         ref={searchRef}
-                        className="relative flex-1 backdrop-blur-sm bg-white/20 rounded-md border border-white/30 dark:border-white/20"
+                        className="relative flex-1 backdrop-blur-sm bg-white/20 rounded-md border border-white dark:border-white"
                     >
                         <Input
                             type="text"
@@ -108,7 +108,7 @@ export function LocationSearch({ onSearch }: SearchBarProps) {
                                 suggestions.length > 0 &&
                                 setShowSuggestions(true)
                             }
-                            className="pl-10 h-10 w-full bg-transparent border-0"
+                            className="pl-10 h-10 w-full bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 outline-none"
                         />
                         <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
 
