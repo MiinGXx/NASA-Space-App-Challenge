@@ -106,6 +106,12 @@ const PollutionHeatmapLayer = ({
     const heatLayerRef = useRef<any>(null);
 
     useEffect(() => {
+        console.log("🗺️ PollutionHeatmapLayer received:", { 
+            pointsCount: points.length, 
+            pollutantType, 
+            points: points.slice(0, 3) // Show first 3 points for debugging
+        });
+        
         // Dynamically import and ensure Leaflet and heat plugin are available
         const initializeHeatmap = async () => {
             if (typeof window === 'undefined') return;

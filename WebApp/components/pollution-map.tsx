@@ -133,7 +133,7 @@ export default function PollutionMap({ location }: PollutionMapProps) {
                 await new Promise(resolve => setTimeout(resolve, 800));
                 setLoadingStage("fetching");
 
-                const apiUrl = `/api/pollution?pollutant=${selectedPollutant}${
+                const apiUrl = `/api/pollution?pollutant=${selectedPollutant}&random=true&count=50${
                     location ? `&location=${encodeURIComponent(location)}` : ""
                 }`;
                 const response = await fetch(apiUrl);
@@ -149,12 +149,16 @@ export default function PollutionMap({ location }: PollutionMapProps) {
                 await new Promise(resolve => setTimeout(resolve, 600));
 
                 const data = await response.json();
+                console.log("🔍 API Response:", data);
+                console.log("🔍 Pollution Data:", data.pollutionData);
+                console.log("🔍 Data length:", data.pollutionData?.length);
                 
                 // Stage 3: Rendering
                 setLoadingStage("rendering");
                 await new Promise(resolve => setTimeout(resolve, 400));
                 
                 setPollutionData(data.pollutionData || []);
+                console.log("✅ Set pollution data:", data.pollutionData || []);
             } catch (err) {
                 console.error("Error fetching pollution data:", err);
                 
