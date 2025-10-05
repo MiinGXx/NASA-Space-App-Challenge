@@ -177,17 +177,25 @@
     }
 }
 
-/* Theme transition styles */
+/* Theme transition styles - Optimized to prevent flickering */
 html {
-    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    transition: none;
 }
 
-html.theme-transition,
-html.theme-transition *,
-html.theme-transition *:before,
-html.theme-transition *:after {
-    transition: all 0.5s ease-in-out !important;
+/* Only apply transitions to specific elements that need smooth theme changes */
+html.theme-transition body,
+html.theme-transition .theme-transition-element {
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out, border-color 0.15s ease-in-out !important;
     transition-delay: 0 !important;
+}
+
+/* Disable transitions during theme change for text elements to prevent flickering */
+html.theme-transition * {
+    transition: none !important;
+}
+
+html.theme-transition body {
+    transition: background-color 0.15s ease-in-out, background-image 0.15s ease-in-out !important;
 }
 
 /* AQI Mood transition styles - smooth transitions for mood changes */
@@ -197,6 +205,17 @@ html.aqi-mood-transition .mood-reactive {
     transition: background 1.2s ease-in-out, background-color 1.2s ease-in-out,
         color 0.8s ease-in-out, border-color 0.8s ease-in-out,
         box-shadow 0.8s ease-in-out !important;
+}
+
+/* Prevent text flickering during theme transitions */
+.no-theme-transition,
+.no-theme-transition * {
+    transition: none !important;
+}
+
+/* Smooth transitions for specific UI elements */
+.theme-transition-element {
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out, border-color 0.15s ease-in-out;
 }
 
 /* Background image transition for theme changes */
