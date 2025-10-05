@@ -78,6 +78,34 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
                 const aqAqi: (number | null)[] =
                     airHourly.us_aqi || airHourly.aqi || [];
 
+                // Get current AQI - match the exact logic from aqi-status.tsx
+                const currentUsAqi = data.air_quality?.current?.us_aqi ?? null;
+                let currentAqiValue: number | null = null;
+
+                if (currentUsAqi != null) {
+                    currentAqiValue = Number(currentUsAqi);
+                } else if (aqTimes && aqTimes.length && aqAqi && aqAqi.length) {
+                    // Find nearest hour to current time
+                    const now = new Date();
+                    let minDiff = Infinity;
+                    let nearestIdx = 0;
+                    for (let i = 0; i < aqTimes.length; i++) {
+                        const t = new Date(aqTimes[i]).getTime();
+                        const diff = Math.abs(t - now.getTime());
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            nearestIdx = i;
+                        }
+                    }
+                    const usVal = aqAqi[nearestIdx] ?? null;
+                    currentAqiValue = usVal != null ? Number(usVal) : null;
+                }
+
+                const finalCurrentAqi =
+                    currentAqiValue == null
+                        ? 0
+                        : Math.min(500, Number(currentAqiValue));
+
                 // If the air-quality times exist and differ from weather times, prefer air times
                 const timeSource = aqTimes && aqTimes.length ? aqTimes : times;
 
@@ -117,21 +145,6 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
                 // helper to get YYYY-MM-DD from ISO string
                 const isoDay = (iso: string) => iso.slice(0, 10);
 
-                // Find the current/nearest hour index for today's AQI
-                let currentHourIdx = 0;
-                if (aqTimes && aqTimes.length) {
-                    const now = new Date();
-                    let minDiff = Infinity;
-                    for (let i = 0; i < aqTimes.length; i++) {
-                        const t = new Date(aqTimes[i]).getTime();
-                        const diff = Math.abs(t - now.getTime());
-                        if (diff < minDiff) {
-                            minDiff = diff;
-                            currentHourIdx = i;
-                        }
-                    }
-                }
-
                 const newWeekly: ForecastData[] = dTimes
                     .slice(0, 7)
                     .map((d: string, i: number) => {
@@ -142,20 +155,12 @@ export function ForecastPanel({ location }: ForecastPanelProps) {
                             .filter(({ at }) => isoDay(at) === dayKey)
                             .map(({ idx }) => idx);
 
-                        // For today (i === 0), use current/nearest hour AQI to match aqi-status
+                        // For today (i === 0), use the SAME current AQI as aqi-status component
                         // For other days, use the max AQI value for the day
                         let dayAqi = 0;
-                        if (
-                            i === 0 &&
-                            aqAqi &&
-                            aqAqi.length &&
-                            currentHourIdx < aqAqi.length
-                        ) {
-                            // Today: use current hour's AQI
-                            dayAqi =
-                                aqAqi[currentHourIdx] != null
-                                    ? Number(aqAqi[currentHourIdx])
-                                    : 0;
+                        if (i === 0) {
+                            // Today: use the exact same AQI value as aqi-status
+                            dayAqi = finalCurrentAqi;
                         } else if (indices.length && aqAqi && aqAqi.length) {
                             // Other days: use max AQI for the day
                             const vals = indices.map((ii) =>
