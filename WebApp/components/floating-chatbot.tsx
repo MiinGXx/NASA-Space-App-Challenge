@@ -13,6 +13,7 @@ import {
     Minimize2,
     Loader2,
 } from "lucide-react";
+import { useAppData } from "@/components/app-data-provider";
 
 interface Message {
     id: string;
@@ -26,6 +27,7 @@ interface FloatingChatbotProps {
 }
 
 export function FloatingChatbot({ className }: FloatingChatbotProps) {
+    const { getContextualData, currentLocation, currentAirQuality } = useAppData();
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
@@ -33,7 +35,7 @@ export function FloatingChatbot({ className }: FloatingChatbotProps) {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: "1",
-            text: "Hello! I'm your AI assistant. How can I help you today?",
+            text: "Hello! I'm your AI assistant. I can help you understand the air quality and weather data for your location. How can I help you today?",
             sender: "bot",
             timestamp: new Date(),
         },
@@ -72,10 +74,16 @@ export function FloatingChatbot({ className }: FloatingChatbotProps) {
         setIsLoading(true);
 
         try {
+            // Get current contextual data
+            const contextData = getContextualData();
+            
             const response = await fetch("/api/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userMessage.text }),
+                body: JSON.stringify({ 
+                    message: userMessage.text,
+                    context: contextData 
+                }),
             });
 
             if (!response.ok) throw new Error("Failed to get response");

@@ -28,8 +28,10 @@ import { AQIHigherLowerGame } from "@/components/aqi-higher-lower-game";
 import { useAQIAudio } from "@/hooks/use-aqi-audio";
 import { MoodReactiveWrapper } from "@/components/mood-reactive-wrapper";
 import { useAQIMood } from "@/components/aqi-mood-provider";
+import { useAppData } from "@/components/app-data-provider";
 
 export default function HomePage() {
+    const { setCurrentLocation: setContextLocation, setCurrentAirQuality, setCurrentWeather } = useAppData();
     const [activeMapTab, setActiveMapTab] = useState<string>("interactive");
     const [currentLocation, setCurrentLocation] = useState<string>("");
     const [currentDate, setCurrentDate] = useState<string>(
@@ -42,6 +44,12 @@ export default function HomePage() {
 
     // AQI Mood management
     const { updateAQI: updateMoodAQI } = useAQIMood();
+
+    // Update location in both local state and context
+    const handleLocationChange = (location: string) => {
+        setCurrentLocation(location);
+        setContextLocation(location);
+    };
 
     // Combined AQI update handler
     const handleAQIUpdate = (aqi: number) => {
@@ -85,7 +93,7 @@ export default function HomePage() {
 
     const handleSearch = (location: string) => {
         console.log("Searching for location:", location);
-        setCurrentLocation(location);
+        handleLocationChange(location);
     };
 
     const triggerNotification = (
