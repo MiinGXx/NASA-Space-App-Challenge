@@ -235,7 +235,7 @@ export default function PollutionMap({ location }: PollutionMapProps) {
         <Card className="w-full h-[600px]">
             <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <CardTitle>
+                    <CardTitle className="text-2xl font-bold">
                         Pollution Heatmap - {currentConfig.label}
                         {currentConfig.unit && (
                             <span className="text-sm font-normal text-muted-foreground ml-2">
