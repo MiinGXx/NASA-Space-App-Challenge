@@ -54,30 +54,30 @@ export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
     };
 
     const getAQIBackground = (value: number) => {
-        // Placeholder gradients - replace with actual images later
-        // Usage: style={{ backgroundImage: getAQIBackground(aqi) }}
+        // Returns background image URL based on AQI threshold
+        // Images should be in public/aqi-backgrounds/ folder
         if (value <= 50) {
             // Good: Clear blue sky with green nature vibes
-            return "linear-gradient(135deg, rgba(34, 193, 195, 0.3) 0%, rgba(45, 253, 139, 0.3) 100%)";
+            return "url('/aqi-backgrounds/aqi-good.png')";
         }
         if (value <= 100) {
             // Moderate: Soft cloudy, slightly filtered
-            return "linear-gradient(135deg, rgba(253, 200, 48, 0.25) 0%, rgba(243, 115, 53, 0.25) 100%)";
+            return "url('/aqi-backgrounds/aqi-moderate.png')";
         }
         if (value <= 150) {
             // Unhealthy for Sensitive: Hazy, muted orange tones
-            return "linear-gradient(135deg, rgba(247, 159, 31, 0.35) 0%, rgba(238, 103, 59, 0.35) 100%)";
+            return "url('/aqi-backgrounds/aqi-unhealthy-sensitive.png')";
         }
         if (value <= 200) {
             // Unhealthy: Heavy smog, orange-red atmosphere
-            return "linear-gradient(135deg, rgba(235, 87, 87, 0.4) 0%, rgba(221, 44, 0, 0.4) 100%)";
+            return "url('/aqi-backgrounds/aqi-unhealthy.png')";
         }
         if (value <= 300) {
             // Very Unhealthy: Dense purple haze
-            return "linear-gradient(135deg, rgba(153, 50, 204, 0.45) 0%, rgba(94, 23, 235, 0.45) 100%)";
+            return "url('/aqi-backgrounds/aqi-very-unhealthy.png')";
         }
         // Hazardous: Apocalyptic red-maroon
-        return "linear-gradient(135deg, rgba(139, 0, 0, 0.5) 0%, rgba(75, 0, 0, 0.5) 100%)";
+        return "url('/aqi-backgrounds/aqi-hazardous.png')";
     };
 
     // Keep city state synced with incoming prop
@@ -425,81 +425,95 @@ export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
             />
             <div className={loading ? "blur-sm pointer-events-none" : ""}>
                 {aqiData ? (
-                    <Card className="w-full h-[520px]">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-xl mood-text-primary">
-                                <MapPin className="h-5 w-5 mood-accent" />
-                                Current Air Quality
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex flex-col justify-center h-full space-y-8">
-                            {/* Main AQI Display */}
-                            <div className="text-center space-y-4">
-                                <div className="relative">
-                                    <div
-                                        className={`w-32 h-32 mx-auto rounded-full ${getAQIColor(
-                                            aqiData.value
-                                        )} flex items-center justify-center`}
-                                    >
-                                        <span className="text-4xl font-bold text-white">
-                                            {aqiData.value}
-                                        </span>
+                    <Card
+                        className="w-full h-[520px] relative overflow-hidden !bg-transparent"
+                        style={{
+                            backgroundImage: getAQIBackground(aqiData.value),
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                        }}
+                    >
+                        {/* Darker semi-transparent overlay for better text readability */}
+                        <div className="absolute inset-0 bg-black/10"></div>
+
+                        {/* Content wrapper with relative positioning */}
+                        <div className="relative z-10 h-full flex flex-col">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-xl mood-text-primary">
+                                    <MapPin className="h-5 w-5 mood-accent" />
+                                    Current Air Quality
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex-1 flex flex-col justify-center space-y-8">
+                                {/* Main AQI Display */}
+                                <div className="text-center space-y-4">
+                                    <div className="relative">
+                                        <div
+                                            className={`w-32 h-32 mx-auto rounded-full ${getAQIColor(
+                                                aqiData.value
+                                            )} flex items-center justify-center`}
+                                        >
+                                            <span className="text-4xl font-bold text-white">
+                                                {aqiData.value}
+                                            </span>
+                                        </div>
+                                        <Badge
+                                            variant="secondary"
+                                            className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white dark:bg-slate-800/90 border-2 border-gray-200 dark:border-slate-700/50 shadow-lg font-semibold text-gray-900 dark:text-white"
+                                        >
+                                            {getAQILevel(aqiData.value)}
+                                        </Badge>
                                     </div>
-                                    <Badge
-                                        variant="secondary"
-                                        className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 backdrop-blur-md bg-white dark:bg-slate-800/90 border-2 border-gray-200 dark:border-slate-700/50 shadow-lg font-semibold text-gray-900 dark:text-white"
-                                    >
-                                        {getAQILevel(aqiData.value)}
-                                    </Badge>
+
+                                    <div className="space-y-2">
+                                        <h3 className="text-2xl font-semibold mood-text-primary">
+                                            {aqiData.location}
+                                        </h3>
+                                        <div className="flex items-center justify-center gap-2 text-sm mood-text-secondary">
+                                            <Clock className="h-4 w-4" />
+                                            Last updated: {aqiData.lastUpdated}
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <h3 className="text-2xl font-semibold mood-text-primary">
-                                        {aqiData.location}
-                                    </h3>
-                                    <div className="flex items-center justify-center gap-2 text-sm mood-text-secondary">
-                                        <Clock className="h-4 w-4" />
-                                        Last updated: {aqiData.lastUpdated}
+                                {/* Pollutant Breakdown */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="text-center p-3 rounded-lg bg-white/20 border border-white/50 shadow-lg">
+                                        <div className="text-lg font-semibold mood-text-primary">
+                                            {aqiData.pollutants.pm25}
+                                        </div>
+                                        <div className="text-xs mood-text-secondary">
+                                            PM2.5 μg/m³
+                                        </div>
+                                    </div>
+                                    <div className="text-center p-3 rounded-lg bg-white/20 border border-white/50 shadow-lg">
+                                        <div className="text-lg font-semibold mood-text-primary">
+                                            {aqiData.pollutants.pm10}
+                                        </div>
+                                        <div className="text-xs mood-text-secondary">
+                                            PM10 μg/m³
+                                        </div>
+                                    </div>
+                                    <div className="text-center p-3 rounded-lg bg-white/20 border border-white/50 shadow-lg">
+                                        <div className="text-lg font-semibold mood-text-primary">
+                                            {aqiData.pollutants.o3}
+                                        </div>
+                                        <div className="text-xs mood-text-secondary">
+                                            O₃ μg/m³
+                                        </div>
+                                    </div>
+                                    <div className="text-center p-3 rounded-lg bg-white/20 border border-white/50 shadow-lg">
+                                        <div className="text-lg font-semibold mood-text-primary">
+                                            {aqiData.pollutants.no2}
+                                        </div>
+                                        <div className="text-xs mood-text-secondary">
+                                            NO₂ μg/m³
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Pollutant Breakdown */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="text-center p-3 rounded-lg backdrop-blur-md bg-white/10 border border-white/50 shadow-lg">
-                                    <div className="text-lg font-semibold mood-text-primary">
-                                        {aqiData.pollutants.pm25}
-                                    </div>
-                                    <div className="text-xs mood-text-secondary">
-                                        PM2.5 μg/m³
-                                    </div>
-                                </div>
-                                <div className="text-center p-3 rounded-lg backdrop-blur-md bg-white/10 border border-white/50 shadow-lg">
-                                    <div className="text-lg font-semibold mood-text-primary">
-                                        {aqiData.pollutants.pm10}
-                                    </div>
-                                    <div className="text-xs mood-text-secondary">
-                                        PM10 μg/m³
-                                    </div>
-                                </div>
-                                <div className="text-center p-3 rounded-lg backdrop-blur-md bg-white/10 border border-white/50 shadow-lg">
-                                    <div className="text-lg font-semibold mood-text-primary">
-                                        {aqiData.pollutants.o3}
-                                    </div>
-                                    <div className="text-xs mood-text-secondary">
-                                        O₃ μg/m³
-                                    </div>
-                                </div>
-                                <div className="text-center p-3 rounded-lg backdrop-blur-md bg-white/10 border border-white/50 shadow-lg">
-                                    <div className="text-lg font-semibold mood-text-primary">
-                                        {aqiData.pollutants.no2}
-                                    </div>
-                                    <div className="text-xs mood-text-secondary">
-                                        NO₂ μg/m³
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
+                            </CardContent>
+                        </div>
                     </Card>
                 ) : (
                     <div className="flex flex-col items-center justify-center min-h-[520px] rounded-lg border border-dashed border-muted-foreground/40 text-center">
