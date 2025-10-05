@@ -2,7 +2,13 @@ import { useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet.heat";
-import type { HeatmapPoint } from "../app/api/tempo/types";
+
+// Define the HeatmapPoint interface directly here
+interface HeatmapPoint {
+    lat: number;
+    lng: number;
+    value: number;
+}
 
 // Define props for the HeatmapLayer component
 interface HeatmapLayerProps {
@@ -41,36 +47,51 @@ const HeatmapLayer = ({
     const heatLayerRef = useRef<any>(null);
 
     useEffect(() => {
-        // Ensure Leaflet and heat plugin are available
-        if (!L || !window.L.heatLayer) {
-            console.error("Leaflet.heat is not loaded");
-            return;
-        }
+        // Dynamically import and ensure Leaflet and heat plugin are available
+        const initializeHeatmap = async () => {
+            if (typeof window === 'undefined') return;
 
-        // Remove existing heatmap layer if it exists
-        if (heatLayerRef.current) {
-            map.removeLayer(heatLayerRef.current);
-        }
+            try {
+                const L = await import('leaflet');
+                await import('leaflet.heat');
+                
+                // Check if heatLayer is available
+                if (!L.default || !(L.default as any).heatLayer) {
+                    console.error("Leaflet.heat is not loaded properly");
+                    return;
+                }
 
-        if (!points || points.length === 0) {
-            return;
-        }
+                // Remove existing heatmap layer if it exists
+                if (heatLayerRef.current) {
+                    map.removeLayer(heatLayerRef.current);
+                }
 
-        // Format points for the heatmap layer
-        const heatPoints = points.map((point) => [
-            point.lat,
-            point.lng,
-            point.value,
-        ]);
+                if (!points || points.length === 0) {
+                    return;
+                }
 
-        // Create and add the heatmap layer
-        heatLayerRef.current = window.L.heatLayer(heatPoints, {
-            radius,
-            maxZoom,
-            blur,
-            max,
-            gradient,
-        }).addTo(map);
+                // Format points for the heatmap layer
+                const heatPoints = points.map((point) => [
+                    point.lat,
+                    point.lng,
+                    point.value,
+                ]);
+
+                // Create and add the heatmap layer
+                heatLayerRef.current = (L.default as any).heatLayer(heatPoints, {
+                    radius,
+                    maxZoom,
+                    blur,
+                    max,
+                    gradient,
+                }).addTo(map);
+
+            } catch (error) {
+                console.error("Error initializing heatmap:", error);
+            }
+        };
+
+        initializeHeatmap();
 
         // Cleanup function
         return () => {

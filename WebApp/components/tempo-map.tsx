@@ -42,15 +42,21 @@ export default function TempoMap({ date }: TempoMapProps) {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             import('leaflet').then((L) => {
-                const defaultIcon = L.default.icon({
-                    iconUrl: "/leaflet/marker-icon.png",
-                    shadowUrl: "/leaflet/marker-shadow.png",
+                // Fix default markers by removing the broken _getIconUrl method
+                delete (L.default.Icon.Default.prototype as any)._getIconUrl;
+                
+                // Set up proper icon URLs using the node_modules path
+                L.default.Icon.Default.mergeOptions({
+                    iconRetinaUrl: '/marker-icon-2x.png',
+                    iconUrl: '/marker-icon.png',
+                    shadowUrl: '/marker-shadow.png',
                     iconSize: [25, 41],
                     iconAnchor: [12, 41],
                     popupAnchor: [1, -34],
-                    shadowSize: [41, 41],
+                    shadowSize: [41, 41]
                 });
-                L.default.Marker.prototype.options.icon = defaultIcon;
+            }).catch((error) => {
+                console.warn('Could not load Leaflet icons:', error);
             });
         }
     }, []);
@@ -108,7 +114,8 @@ export default function TempoMap({ date }: TempoMapProps) {
                         center={usCenter as [number, number]}
                         zoom={zoomLevel}
                         scrollWheelZoom={true}
-                        style={{ height: "100%", width: "100%" }}
+                        style={{ height: "100%", width: "100%", minHeight: "400px" }}
+                        className="rounded-lg overflow-hidden"
                     >
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

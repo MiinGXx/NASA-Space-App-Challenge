@@ -8,6 +8,7 @@ import { HealthGuidance } from "@/components/health-guidance";
 import { Header } from "@/components/header";
 import { LocationSearch } from "@/components/location-search";
 import TempoMap from "@/components/tempo-map";
+import PollutionMap from "@/components/pollution-map";
 import {
     PushNotification,
     useNotifications,
@@ -15,7 +16,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { Bell, AlertTriangle, CheckCircle, Info, Sparkles } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogTrigger,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { AQIHigherLowerGame } from "@/components/aqi-higher-lower-game";
 
 export default function HomePage() {
     const [activeMapTab, setActiveMapTab] = useState<string>("interactive");
@@ -55,6 +66,7 @@ export default function HomePage() {
     }, []);
     const { notification, showNotification, hideNotification } =
         useNotifications();
+    const [openGame, setOpenGame] = useState(false);
 
     const handleSearch = (location: string) => {
         console.log("Searching for location:", location);
@@ -114,7 +126,7 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Map Tabs - Interactive Map and TEMPO NO2 Map */}
+                {/* Map Tabs - Interactive Map, TEMPO NO2 Map, and Pollution Heatmap */}
                 <Tabs defaultValue="interactive" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 border border-white/50 rounded-lg">
                         <TabsTrigger
@@ -145,6 +157,9 @@ export default function HomePage() {
                     </TabsContent>
                     <TabsContent value="tempo" className="mt-4">
                         <TempoMap date={currentDate} />
+                    </TabsContent>
+                    <TabsContent value="pollution" className="mt-4">
+                        <PollutionMap location={currentLocation} />
                     </TabsContent>
                 </Tabs>
 
