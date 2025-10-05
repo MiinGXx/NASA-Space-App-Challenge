@@ -1,0 +1,45 @@
+# Azure App Service deployment configuration
+web.config:
+  system.webServer:
+    defaultDocument:
+      enabled: true
+      files:
+        - "server.js"
+        - "index.html"
+    
+    staticContent:
+      clientCache:
+        cacheControlMode: "UseMaxAge"
+        cacheControlMaxAge: "7.00:00:00"
+    
+    urlCompression:
+      doStaticCompression: true
+      doDynamicCompression: true
+    
+    httpCompression:
+      staticTypes:
+        - "text/*"
+        - "application/javascript"
+        - "application/json"
+        - "application/xml"
+        - "image/svg+xml"
+    
+    rewrite:
+      rules:
+        - name: "Next.js Routes"
+          match:
+            url: "^(.*)$"
+          conditions:
+            - input: "{REQUEST_FILENAME}"
+              matchType: "IsFile"
+              negate: true
+            - input: "{REQUEST_FILENAME}"
+              matchType: "IsDirectory" 
+              negate: true
+          action:
+            type: "Rewrite"
+            url: "server.js"
+
+# For Node.js runtime
+startup_command: "node server.js"
+port: "8080"

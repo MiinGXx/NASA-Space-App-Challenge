@@ -1,0 +1,19 @@
+{
+  "navigationFallback": {
+    "rewrite": "/404.html"
+  },
+  "responseOverrides": {
+    "404": {
+      "redirect": "/404.html",
+      "statusCode": 404
+    }
+  },
+  "networking": {
+    "allowedOrigins": ["*"]
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "X-XSS-Protection": "1; mode=block"
+  }
+}

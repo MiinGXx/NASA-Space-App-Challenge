@@ -1,0 +1,54 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "main", "master", "develop", "ChatbotContext" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./WebApp
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
+        cache-dependency-path: './WebApp/pnpm-lock.yaml'
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 8
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Run linter
+      run: pnpm run lint
+
+    - name: Type check
+      run: npx tsc --noEmit
+
+    - name: Build application
+      run: pnpm run build
+      env:
+        NEXT_TELEMETRY_DISABLED: 1
+
+    - name: Check build output
+      run: |
+        ls -la .next/
+        ls -la out/ || echo "No out directory (expected for standalone build)"
