@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { message } = await request.json()
+    const { message, context } = await request.json()
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -42,14 +42,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Build contextual system message
+    let systemContent = `You are a helpful AI assistant integrated into a NASA Space App Challenge project for air quality and weather monitoring. 
+    Respond in natural, conversational sentences without any formatting, lists, bullet points, or bold text.
+    Keep responses brief and friendly, as if you're having a casual conversation.
+    Answer questions directly in 1-2 simple sentences maximum.
+    Do not use markdown formatting, asterisks, dashes, or numbered lists.
+    Speak naturally and conversationally about air quality, weather, and environmental data.
+    If you do not have the context for the prompted location, respond with "I'm sorry, but I can only give information on your current location."`
+
+    if (context && context.trim()) {
+      systemContent += `\n\nCurrent application data: ${context}`
+      systemContent += `\n\nUse this specific data to give personalized responses about the user's current location and conditions. Mention specific numbers and details when relevant, but keep it conversational.`
+    }
+
     // Prepare the messages for Azure AI Foundry
     const messages: ChatMessage[] = [
       {
         role: 'system',
-        content: `You are a helpful AI assistant integrated into a NASA Space App Challenge project. 
-        You should be knowledgeable about space, weather, air quality, and environmental data.
-        Provide concise, helpful responses while being friendly and engaging.
-        Keep responses relatively brief since this is a chat interface.`
+        content: systemContent
       },
       {
         role: 'user',

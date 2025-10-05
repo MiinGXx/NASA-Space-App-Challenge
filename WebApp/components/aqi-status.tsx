@@ -8,6 +8,7 @@ import {
     PushNotification,
     useNotifications,
 } from "@/components/push-notification";
+import { useAppData } from "@/components/app-data-provider";
 
 interface AQIData {
     value: number;
@@ -28,6 +29,7 @@ interface AQIStatusProps {
 }
 
 export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
+    const { setCurrentAirQuality, setCurrentWeather } = useAppData();
     const [loading, setLoading] = useState(false);
     const [aqiData, setAqiData] = useState<AQIData | null>(null);
     const [city, setCity] = useState<string | undefined>(location);
@@ -154,7 +156,8 @@ export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
 
                         const finalAqi =
                             aqiVal == null ? 0 : Math.min(500, Number(aqiVal));
-                        setAqiData({
+                        
+                        const aqiDataObj = {
                             value: finalAqi,
                             level: getAQILevel(finalAqi),
                             location: targetCity,
@@ -174,7 +177,31 @@ export function AQIStatus({ location, onAQIUpdate }: AQIStatusProps) {
                                         ] || 0) * 10
                                     ) / 10,
                             },
+                        };
+                        
+                        setAqiData(aqiDataObj);
+                        
+                        // Update app context with air quality data
+                        setCurrentAirQuality({
+                            aqi: finalAqi,
+                            level: getAQILevel(finalAqi),
+                            location: targetCity,
+                            pollutants: aqiDataObj.pollutants,
+                            lastUpdated: aqiDataObj.lastUpdated,
                         });
+
+                        // Update app context with weather data if available
+                        if (json.current_weather) {
+                            setCurrentWeather({
+                                temperature: Math.round(json.current_weather.temperature),
+                                humidity: Math.round(json.hourly?.relative_humidity_2m?.[0] || 0),
+                                windSpeed: Math.round(json.current_weather.windspeed * 10) / 10,
+                                precipitation: Math.round((json.hourly?.precipitation?.[0] || 0) * 10) / 10,
+                                weatherCode: json.current_weather.weathercode,
+                                location: targetCity,
+                                lastUpdated: new Date().toLocaleTimeString(),
+                            });
+                        }
 
                         // Update audio based on AQI
                         if (onAQIUpdate) {

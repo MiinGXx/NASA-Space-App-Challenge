@@ -28,12 +28,16 @@ import { AQIHigherLowerGame } from "@/components/aqi-higher-lower-game";
 import { useAQIAudio } from "@/hooks/use-aqi-audio";
 import { MoodReactiveWrapper } from "@/components/mood-reactive-wrapper";
 import { useAQIMood } from "@/components/aqi-mood-provider";
+import { useAppData } from "@/components/app-data-provider";
 
 export default function HomePage() {
+    const { setCurrentLocation: setContextLocation, setCurrentAirQuality, setCurrentWeather } = useAppData();
+    const [activeMapTab, setActiveMapTab] = useState<string>("interactive");
     const [currentLocation, setCurrentLocation] = useState<string>("");
     const [currentDate, setCurrentDate] = useState<string>(
         new Date().toISOString().split("T")[0]
     );
+    const [currentAQI, setCurrentAQI] = useState<number | undefined>(undefined);
 
     // AQI Audio management
     const { isMuted, toggleMute, updateAQI: updateAudioAQI } = useAQIAudio();
@@ -41,8 +45,15 @@ export default function HomePage() {
     // AQI Mood management
     const { updateAQI: updateMoodAQI } = useAQIMood();
 
+    // Update location in both local state and context
+    const handleLocationChange = (location: string) => {
+        setCurrentLocation(location);
+        setContextLocation(location);
+    };
+
     // Combined AQI update handler
     const handleAQIUpdate = (aqi: number) => {
+        setCurrentAQI(aqi);
         updateAudioAQI(aqi);
         updateMoodAQI(aqi);
     };
@@ -82,7 +93,7 @@ export default function HomePage() {
 
     const handleSearch = (location: string) => {
         console.log("Searching for location:", location);
-        setCurrentLocation(location);
+        handleLocationChange(location);
     };
 
     const triggerNotification = (
@@ -138,7 +149,7 @@ export default function HomePage() {
 
                         {/* Health Guidance - Sidebar on desktop */}
                         <div className="lg:col-span-2">
-                            <HealthGuidance location={currentLocation} />
+                            <HealthGuidance location={currentLocation} aqi={currentAQI} />
                         </div>
                     </div>
 
@@ -154,7 +165,7 @@ export default function HomePage() {
 
                     {/* Health Guidance - Full width on mobile */}
                     <div className="lg:hidden w-full">
-                        <HealthGuidance location={currentLocation} />
+                        <HealthGuidance location={currentLocation} aqi={currentAQI} />
                     </div>
 
                     {/* Notification Demo Buttons - Bottom of page */}

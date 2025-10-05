@@ -3,7 +3,7 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 export function ModeToggle() {
     const { theme, setTheme } = useTheme();
@@ -15,27 +15,42 @@ export function ModeToggle() {
     }, []);
 
     const toggleTheme = () => {
+        // Add transition class for smooth theme change
+        document.documentElement.classList.add('theme-transition');
+        
         if (theme === "dark") {
             setTheme("light");
         } else {
             setTheme("dark");
         }
+
+        // Remove transition class after animation completes
+        setTimeout(() => {
+            document.documentElement.classList.remove('theme-transition');
+        }, 200);
     };
 
     if (!mounted) {
-        return null;
+        return (
+            <div className="flex items-center space-x-2 opacity-0">
+                <Sun className="h-[1.2rem] w-[1.2rem]" />
+                <div className="h-6 w-11 bg-gray-200 rounded-full" />
+                <Moon className="h-[1.2rem] w-[1.2rem]" />
+            </div>
+        );
     }
 
+    const isDark = theme === "dark";
+
     return (
-        <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-        >
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-        </Button>
+        <div className="flex items-center space-x-2">
+            <Sun className="h-[1.2rem] w-[1.2rem] text-yellow-500 transition-colors duration-150" />
+            <Switch
+                checked={isDark}
+                onCheckedChange={toggleTheme}
+                aria-label="Toggle theme"
+            />
+            <Moon className="h-[1.2rem] w-[1.2rem] text-blue-400 transition-colors duration-150" />
+        </div>
     );
 }
