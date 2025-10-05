@@ -143,6 +143,21 @@ export function FloatingChatbot({ className }: FloatingChatbotProps) {
 
   return (
     <div className={cn("fixed bottom-4 right-4 z-50", className)}>
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background-color: rgba(255, 255, 255, 0.2);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(255, 255, 255, 0.3);
+        }
+      `}</style>
       {/* Floating Button */}
       {!isOpen && (
         <Button
@@ -194,7 +209,13 @@ export function FloatingChatbot({ className }: FloatingChatbotProps) {
 
           {/* Chat Area (80%) */}
           {!isMinimized && (
-            <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 bg-transparent">
+            <div 
+              className="flex-1 overflow-y-auto px-3 py-3 space-y-3 bg-transparent custom-scrollbar"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(255, 255, 255, 0.2) transparent'
+              }}
+            >
               {messages.map((message) => (
                 <div
                   key={message.id}
